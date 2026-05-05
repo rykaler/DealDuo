@@ -1,0 +1,83 @@
+/* PAGE */
+.landing-page {
+  height: 100vh;
+  background: #0A1B2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* CARD */
+.hero-card {
+  text-align: center;
+  padding: 40px;
+  border-radius: 16px;
+}
+
+/* LOGO */
+.logo {
+  font-size: 100px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 3px;
+  margin: 0;
+  line-height: 1;
+}
+
+.logo span {
+  color: #D5AD36;
+}
+
+/* TAGLINE */
+.tagline {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #D5AD36;
+  letter-spacing: 3px;
+}
+
+/* SUBTEXT */
+.subtext {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* BUTTONS */
+.buttons {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.landing-login-btn {
+  padding: 12px 25px;
+  border: 1px solid #D5AD36;
+  background: transparent;
+  color: #D5AD36;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.landing-login-btn:hover {
+  background: #D5AD36;
+  color: #0A1B2A;
+}
+
+.landing-signup-btn {
+  padding: 12px 25px;
+  border: 1px solid #D5AD36;
+  background: transparent;
+  color: #D5AD36;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.landing-signup-btn:hover {
+  background: #D5AD36;
+  color: #0A1B2A;
+}

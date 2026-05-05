@@ -1,0 +1,23 @@
+.trade-page {
+  padding: 20px;
+  color: white;
+}
+
+.trade-card {
+  background: #081521;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.trade-card button {
+  margin-right: 5px;
+  margin-top: 5px;
+  padding: 8px;
+  border: none;
+  background: #d5ad36;
+  color: #0a1b2a;
+  cursor: pointer;
+  border-radius: 5px;
+  pointer-events: auto;
+}

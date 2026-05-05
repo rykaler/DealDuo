@@ -1,0 +1,86 @@
+/* PAGE BACKGROUND */
+.add-page {
+  height: 100vh;
+  background: #0A1B2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* CARD */
+.add-card {
+  width: 400px;
+  background: #081521;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  color: white;
+  text-align: center;
+}
+
+/* TITLE */
+.add-card h2 {
+  margin-bottom: 5px;
+  color: #D5AD36;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+/* INPUTS */
+.add-card input,
+.add-card select,
+.add-card textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #0A1B2A;
+  color: white;
+  outline: none;
+}
+
+/* TEXTAREA */
+.add-card textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #D5AD36;
+  color: #0A1B2A;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px solid #D5AD36;
+  color: #D5AD36;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: #D5AD36;
+  color: #0A1B2A;
+}

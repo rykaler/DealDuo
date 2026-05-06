@@ -9,13 +9,16 @@ import AddListing from "./AddListing";
 import Chat from "./Chat";
 import Messages from "./Messages";
 import AdminDashboard from "./AdminDashboard";
-import EditListing from "./EditListing";
 import TradeRequests from "./TradeRequest";
 
 function App() {
+
   const [page, setPage] = useState("landing");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [editId, setEditId] = useState(null);
+
+  // ❌ REMOVE editId
+  // const [editId, setEditId] = useState(null);
+
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,43 +30,66 @@ function App() {
   }, []);
 
   const checkSession = async () => {
+
     try {
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      // NO SESSION
       if (!user) {
         setPage("landing");
         setLoading(false);
         return;
       }
 
+      // GET USER ROLE
       const { data, error } = await supabase
         .from("users")
         .select("role, is_suspended")
         .eq("id", user.id)
         .single();
 
+      // INVALID USER
       if (error || !data) {
+
         await supabase.auth.signOut();
+
         setPage("landing");
         setLoading(false);
+
         return;
       }
 
+      // SUSPENDED
       if (data.is_suspended) {
+
         alert("🚫 Your account is suspended.");
+
         await supabase.auth.signOut();
+
         setPage("landing");
         setLoading(false);
+
         return;
       }
 
+      // SUCCESS
       setRole(data.role);
-      setPage(data.role === "admin" ? "admin" : "dashboard");
+
+      setPage(
+        data.role === "admin"
+          ? "admin"
+          : "dashboard"
+      );
+
       setLoading(false);
+
     } catch (err) {
+
       console.log(err);
+
       setPage("landing");
       setLoading(false);
     }
@@ -73,7 +99,9 @@ function App() {
   // OPEN CHAT
   // =========================
   const openChat = (userId) => {
+
     setSelectedUser(userId);
+
     setPage("chat");
   };
 
@@ -88,8 +116,15 @@ function App() {
   // LOADING
   // =========================
   if (loading) {
+
     return (
-      <div style={{ color: "white", textAlign: "center", marginTop: "50px" }}>
+      <div
+        style={{
+          color: "white",
+          textAlign: "center",
+          marginTop: "50px",
+        }}
+      >
         Loading...
       </div>
     );
@@ -97,6 +132,7 @@ function App() {
 
   return (
     <>
+
       {/* =========================
           LANDING
       ========================= */}
@@ -114,8 +150,14 @@ function App() {
         <Login
           goBack={() => setPage("landing")}
           onSuccess={(userRole) => {
+
             setRole(userRole);
-            setPage(userRole === "admin" ? "admin" : "dashboard");
+
+            setPage(
+              userRole === "admin"
+                ? "admin"
+                : "dashboard"
+            );
           }}
         />
       )}
@@ -127,8 +169,14 @@ function App() {
         <Signup
           goBack={() => setPage("landing")}
           onSuccess={(userRole) => {
+
             setRole(userRole);
-            setPage(userRole === "admin" ? "admin" : "dashboard");
+
+            setPage(
+              userRole === "admin"
+                ? "admin"
+                : "dashboard"
+            );
           }}
         />
       )}
@@ -136,73 +184,85 @@ function App() {
       {/* =========================
           DASHBOARD
       ========================= */}
-      {page === "dashboard" && role !== "admin" && (
-        <Dashboard
-          goAddListing={() => setPage("addListing")}
-          goChat={openChat}
-          goMessages={() => setPage("messages")}
-          goTrades={openTrades}   // 🔥 IMPORTANT
-        />
-      )}
+      {page === "dashboard" &&
+        role !== "admin" && (
+          <Dashboard
+            goAddListing={() =>
+              setPage("addListing")
+            }
+            goChat={openChat}
+            goMessages={() =>
+              setPage("messages")
+            }
+            goTrades={openTrades}
+          />
+        )}
 
       {/* =========================
           ADMIN
       ========================= */}
-      {page === "admin" && role === "admin" && (
-        <AdminDashboard
-          goBack={async () => {
-            await supabase.auth.signOut();
-            setPage("landing");
-          }}
-        />
-      )}
+      {page === "admin" &&
+        role === "admin" && (
+          <AdminDashboard
+            goBack={async () => {
+
+              await supabase.auth.signOut();
+
+              setPage("landing");
+            }}
+          />
+        )}
 
       {/* =========================
           ADD LISTING
       ========================= */}
       {page === "addListing" && (
-        <AddListing goBack={() => setPage("dashboard")} />
-      )}
-
-      {/* =========================
-          EDIT LISTING
-      ========================= */}
-      {page === "editListing" && (
-        <EditListing
-          id={editId}
-          goBack={() => setPage("dashboard")}
+        <AddListing
+          goBack={() =>
+            setPage("dashboard")
+          }
         />
       )}
+
+      {/* ❌ REMOVE EDIT LISTING PAGE */}
 
       {/* =========================
           CHAT
       ========================= */}
-      {page === "chat" && selectedUser && (
-        <Chat
-          receiverId={selectedUser}
-          goBack={() => setPage("dashboard")}
-        />
-      )}
+      {page === "chat" &&
+        selectedUser && (
+          <Chat
+            receiverId={selectedUser}
+            goBack={() =>
+              setPage("dashboard")
+            }
+          />
+        )}
 
       {/* =========================
           MESSAGES
       ========================= */}
       {page === "messages" && (
         <Messages
-          goBack={() => setPage("dashboard")}
+          goBack={() =>
+            setPage("dashboard")
+          }
           openChat={openChat}
         />
       )}
 
       {/* =========================
-          TRADE REQUESTS (FIXED)
+          TRADE REQUESTS
       ========================= */}
       {page === "trades" && (
         <TradeRequests
-          goBack={() => setPage("dashboard")}
-          goChat={openChat}   // 🔥 CRITICAL FIX (this was missing before)
+          goBack={() =>
+            setPage("dashboard")
+          }
+          goChat={openChat}
         />
       )}
+
     </>
   );
 }

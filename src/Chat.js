@@ -15,6 +15,7 @@ const Chat = ({ receiverId, goBack }) => {
 
   const getUser = async () => {
     const { data } = await supabase.auth.getUser();
+
     setUser(data.user);
 
     if (data.user) {
@@ -29,7 +30,9 @@ const Chat = ({ receiverId, goBack }) => {
   };
 
   useEffect(() => {
-    if (user && receiverId) fetchMessages();
+    if (user && receiverId) {
+      fetchMessages();
+    }
   }, [user, receiverId]);
 
   const fetchMessages = async () => {
@@ -65,9 +68,33 @@ const Chat = ({ receiverId, goBack }) => {
     fetchMessages();
   };
 
+  // 🚨 REPORT USER
+  const reportUser = async () => {
+    await supabase.from("reports").insert({
+      reporter_id: user.id,
+      reported_user_id: receiverId,
+      reason: "User reported from chat",
+    });
+
+    showToast("⚠ User reported");
+  };
+
+  // 🚫 BLOCK USER
+  const blockUser = async () => {
+    await supabase.from("blocked_users").insert({
+      blocker_id: user.id,
+      blocked_id: receiverId,
+    });
+
+    showToast("🚫 User blocked");
+  };
+
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(""), 3000);
+
+    setTimeout(() => {
+      setToast("");
+    }, 3000);
   };
 
   return (
@@ -75,8 +102,30 @@ const Chat = ({ receiverId, goBack }) => {
 
       {/* HEADER */}
       <div className="chat-header">
-        <button onClick={goBack}>←</button>
-        <h3>Conversation</h3>
+
+        {/* LEFT SIDE */}
+        <div className="header-left">
+          <button onClick={goBack}>←</button>
+          <h3>Conversation</h3>
+        </div>
+
+        {/* REPORT MENU */}
+        <div className="report-wrap">
+          <button className="report-btn">
+            Report
+          </button>
+
+          <div className="report-menu">
+            <button onClick={reportUser}>
+              ⚠ Report User
+            </button>
+
+            <button onClick={blockUser}>
+              🚫 Block User
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* 🚨 SUSPENSION WARNING */}
@@ -88,26 +137,41 @@ const Chat = ({ receiverId, goBack }) => {
         </div>
       )}
 
-      {userStatus?.chat_disabled && !userStatus?.is_suspended && (
-        <div className="ban-banner">
-          ⚠ Chat feature is temporarily disabled
-        </div>
-      )}
+      {/* 🚨 CHAT DISABLED WARNING */}
+      {userStatus?.chat_disabled &&
+        !userStatus?.is_suspended && (
+          <div className="ban-banner">
+            ⚠ Chat feature is temporarily disabled
+          </div>
+        )}
 
       {/* CHAT BOX */}
       <div className="chat-box">
+
+        {messages.length === 0 && (
+          <div className="no-msg">
+            No messages yet
+          </div>
+        )}
+
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={msg.sender_id === user?.id ? "my-msg" : "their-msg"}
+            className={
+              msg.sender_id === user?.id
+                ? "my-msg"
+                : "their-msg"
+            }
           >
             {msg.text}
           </div>
         ))}
+
       </div>
 
-      {/* INPUT (DISABLED IF BLOCKED) */}
+      {/* INPUT */}
       <div className="chat-input">
+
         <input
           value={text}
           disabled={isBlocked}
@@ -119,13 +183,22 @@ const Chat = ({ receiverId, goBack }) => {
           }
         />
 
-        <button onClick={sendMessage} disabled={isBlocked}>
+        <button
+          onClick={sendMessage}
+          disabled={isBlocked}
+        >
           Send
         </button>
+
       </div>
 
       {/* TOAST */}
-      {toast && <div className="toast">{toast}</div>}
+      {toast && (
+        <div className="toast">
+          {toast}
+        </div>
+      )}
+
     </div>
   );
 };

@@ -12,6 +12,9 @@ import { supabase } from "./supabaseClient";
 
 import "./Admin.css";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 import {
   Chart as ChartJS,
   BarElement,
@@ -227,7 +230,7 @@ const AdminDashboard = ({
   };
 
   // =========================
-  // REPORTS
+  // FETCH REPORTS
   // =========================
   const fetchReports =
     async () => {
@@ -298,7 +301,7 @@ const AdminDashboard = ({
   };
 
   // =========================
-  // TRANSACTIONS
+  // FETCH TRADES
   // =========================
   const fetchTransactions =
     async () => {
@@ -418,7 +421,7 @@ const AdminDashboard = ({
   };
 
   // =========================
-  // BLOCKED USERS
+  // FETCH BLOCKED USERS
   // =========================
   const fetchBlockedUsers =
     async () => {
@@ -478,7 +481,7 @@ const AdminDashboard = ({
   };
 
   // =========================
-  // AUTO MODERATION
+  // RUN AUTO MODERATION
   // =========================
   const runAutoModeration =
     async () => {
@@ -547,55 +550,12 @@ const AdminDashboard = ({
       const score =
         map[userId].score;
 
-      const { data: user } =
-        await supabase
-          .from("users")
-          .select(
-            "is_suspended"
-          )
-          .eq("id", userId)
-          .single();
-
-      if (
-        user?.is_suspended
-      )
-        continue;
-
-      if (score >= 8) {
-
-        await supabase
-          .from("listings")
-          .update({
-            hidden: true,
-          })
-          .eq(
-            "user_id",
-            userId
-          );
-      }
-
-      if (score >= 12) {
-
-        await supabase
-          .from("users")
-          .update({
-            chat_disabled: true,
-          })
-          .eq("id", userId);
-      }
-
       if (score >= 20) {
 
         await supabase
           .from("users")
           .update({
             is_suspended: true,
-
-            suspended_at:
-              new Date(),
-
-            suspension_reason:
-              "Auto moderation: high report score",
           })
           .eq("id", userId);
       }
@@ -608,6 +568,52 @@ const AdminDashboard = ({
     );
 
     fetchAll();
+  };
+
+  // =========================
+  // EXPORT PDF
+  // =========================
+  const exportPDF = () => {
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(22);
+
+    doc.text(
+      "DealDuo Admin Report",
+      14,
+      20
+    );
+
+    doc.setFontSize(11);
+
+    doc.text(
+      `Generated: ${new Date().toLocaleString()}`,
+      14,
+      30
+    );
+
+    autoTable(doc, {
+      startY: 40,
+
+      head: [
+        ["Category", "Count"]
+      ],
+
+      body: [
+        ["Users", stats.users],
+        ["Reports", stats.reports],
+        ["Messages", stats.messages],
+        ["Suspended", stats.suspended],
+        ["Trades", stats.trades],
+        ["Sold", stats.sold],
+        ["Blocked Users", stats.blockedUsers],
+      ],
+    });
+
+    doc.save(
+      "DealDuo_Report.pdf"
+    );
   };
 
   // =========================
@@ -662,49 +668,6 @@ const AdminDashboard = ({
 
         <p
           className={
-            activeTab === "trades"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setActiveTab(
-              "trades"
-            )
-          }
-        >
-          Trades
-        </p>
-
-        <p
-          className={
-            activeTab === "sold"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setActiveTab("sold")
-          }
-        >
-          Sold
-        </p>
-
-        <p
-          className={
-            activeTab === "reports"
-              ? "active"
-              : ""
-          }
-          onClick={() =>
-            setActiveTab(
-              "reports"
-            )
-          }
-        >
-          Reports
-        </p>
-
-        <p
-          className={
             activeTab === "blocked"
               ? "active"
               : ""
@@ -738,6 +701,12 @@ const AdminDashboard = ({
           >
 
             <button
+              onClick={exportPDF}
+            >
+              Export PDF
+            </button>
+
+            <button
               onClick={
                 runAutoModeration
               }
@@ -762,7 +731,6 @@ const AdminDashboard = ({
           "dashboard" && (
 
           <>
-
             <div className="stats-grid">
 
               <div className="stat-card">
@@ -795,12 +763,8 @@ const AdminDashboard = ({
                 <p>{stats.sold}</p>
               </div>
 
-              {/* BLOCKED CARD */}
               <div className="stat-card blocked-card">
-                <h3>
-                  Blocked Users
-                </h3>
-
+                <h3>Blocked Users</h3>
                 <p>
                   {stats.blockedUsers}
                 </p>
@@ -831,7 +795,7 @@ const AdminDashboard = ({
           </>
         )}
 
-        {/* BLOCKED USERS PAGE */}
+        {/* BLOCKED USERS */}
         {activeTab ===
           "blocked" && (
 
@@ -857,7 +821,7 @@ const AdminDashboard = ({
                 >
 
                   <h3>
-                    Blocked User
+                    🚫 Blocked User
                   </h3>
 
                   <p>

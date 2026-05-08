@@ -11,15 +11,17 @@ import Messages from "./Messages";
 import AdminDashboard from "./AdminDashboard";
 import TradeRequests from "./TradeRequest";
 
+// ✅ IMPORT PROFILE PAGE
+import Profile from "./Profile";
+
 function App() {
 
   const [page, setPage] = useState("landing");
+
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // ❌ REMOVE editId
-  // const [editId, setEditId] = useState(null);
-
   const [role, setRole] = useState(null);
+
   const [loading, setLoading] = useState(true);
 
   // =========================
@@ -39,8 +41,11 @@ function App() {
 
       // NO SESSION
       if (!user) {
+
         setPage("landing");
+
         setLoading(false);
+
         return;
       }
 
@@ -57,6 +62,7 @@ function App() {
         await supabase.auth.signOut();
 
         setPage("landing");
+
         setLoading(false);
 
         return;
@@ -70,6 +76,7 @@ function App() {
         await supabase.auth.signOut();
 
         setPage("landing");
+
         setLoading(false);
 
         return;
@@ -91,6 +98,7 @@ function App() {
       console.log(err);
 
       setPage("landing");
+
       setLoading(false);
     }
   };
@@ -109,6 +117,7 @@ function App() {
   // OPEN TRADE REQUESTS
   // =========================
   const openTrades = () => {
+
     setPage("trades");
   };
 
@@ -190,13 +199,32 @@ function App() {
             goAddListing={() =>
               setPage("addListing")
             }
+
             goChat={openChat}
+
             goMessages={() =>
               setPage("messages")
             }
+
             goTrades={openTrades}
+
+            // ✅ PROFILE BUTTON
+            goProfile={() =>
+              setPage("profile")
+            }
           />
         )}
+
+      {/* =========================
+          PROFILE
+      ========================= */}
+      {page === "profile" && (
+        <Profile
+          goBack={() =>
+            setPage("dashboard")
+          }
+        />
+      )}
 
       {/* =========================
           ADMIN
@@ -224,8 +252,6 @@ function App() {
         />
       )}
 
-      {/* ❌ REMOVE EDIT LISTING PAGE */}
-
       {/* =========================
           CHAT
       ========================= */}
@@ -233,6 +259,7 @@ function App() {
         selectedUser && (
           <Chat
             receiverId={selectedUser}
+
             goBack={() =>
               setPage("dashboard")
             }
@@ -247,6 +274,7 @@ function App() {
           goBack={() =>
             setPage("dashboard")
           }
+
           openChat={openChat}
         />
       )}
@@ -259,6 +287,7 @@ function App() {
           goBack={() =>
             setPage("dashboard")
           }
+
           goChat={openChat}
         />
       )}

@@ -1,0 +1,234 @@
+/* Profile.css */
+
+.profile-page {
+  min-height: 100vh;
+  background: #07162b;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+  color: white;
+  box-sizing: border-box;
+}
+
+/* =========================
+   TOP
+========================= */
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+
+  padding: 0;
+}
+
+.arrow {
+  color: #f4c430;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.back-text {
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.back-btn:hover {
+  background: transparent;
+}
+
+/* =========================
+   PROFILE CARD
+========================= */
+
+.profile-card {
+  width: 100%;
+  max-width: 900px;
+
+  margin: auto;
+
+  background: #0d223d;
+
+  border-radius: 24px;
+
+  padding: 40px;
+
+  text-align: center;
+
+  margin-bottom: 50px;
+
+  box-sizing: border-box;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+
+  border-radius: 50%;
+
+  background: #f4c430;
+  color: #07162b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 45px;
+  font-weight: bold;
+
+  margin: auto;
+}
+
+.profile-card h1 {
+  margin-top: 20px;
+  font-size: 35px;
+}
+
+.email {
+  color: #c5cede;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+/* =========================
+   MY LISTINGS
+========================= */
+
+.my-listings {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.my-listings h2 {
+  margin-bottom: 25px;
+  font-size: 32px;
+}
+
+/* =========================
+   GRID
+========================= */
+
+.listing-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(250px, 250px));
+
+  gap: 25px;
+
+  justify-content: flex-start;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.listing-card {
+  background: #0d223d;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  position: relative;
+
+  transition: 0.3s;
+}
+
+.listing-card:hover {
+  transform: translateY(-5px);
+}
+
+/* IMAGE */
+
+.listing-card img {
+  width: 100%;
+  height: 220px;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+/* TEXT */
+
+.listing-card h3 {
+  font-size: 20px;
+  margin: 15px;
+}
+
+.price {
+  color: #f4c430;
+
+  font-size: 20px;
+
+  font-weight: bold;
+
+  margin: 0 15px 20px;
+}
+
+/* =========================
+   BADGE
+========================= */
+
+.badge {
+  position: absolute;
+
+  top: 12px;
+  right: 12px;
+
+  background: crimson;
+
+  color: white;
+
+  padding: 7px 14px;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .profile-page {
+    padding: 20px;
+  }
+
+  .profile-card {
+    padding: 30px 20px;
+  }
+
+  .profile-card h1 {
+    font-size: 28px;
+  }
+
+  .listing-grid {
+    justify-content: center;
+  }
+
+  .arrow {
+    font-size: 26px;
+  }
+
+  .back-text {
+    font-size: 18px;
+  }
+
+}

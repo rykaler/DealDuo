@@ -3,7 +3,14 @@ import { supabase } from "./supabaseClient";
 import "./Dashboard.css";
 import EditListing from "./EditListing";
 
-const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
+const Dashboard = ({
+  goAddListing,
+  goChat,
+  goMessages,
+  goTrades,
+  goProfile
+}) => {
+
   const [listings, setListings] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [user, setUser] = useState(null);
@@ -14,10 +21,10 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   const [priceRange, setPriceRange] = useState("");
   const [status, setStatus] = useState("");
 
-  // ✅ EDIT STATE
+  // EDIT
   const [editItem, setEditItem] = useState(null);
 
-  // TRADE STATES
+  // TRADE
   const [tradeItem, setTradeItem] = useState(null);
   const [myItems, setMyItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState("");
@@ -30,7 +37,9 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   }, []);
 
   const init = async () => {
+
     const { data } = await supabase.auth.getUser();
+
     setUser(data.user);
 
     fetchListings();
@@ -44,6 +53,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // FETCH LISTINGS
   // =========================
   const fetchListings = async () => {
+
     const { data } = await supabase
       .from("listings")
       .select("*")
@@ -56,6 +66,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // FETCH MY ITEMS
   // =========================
   const fetchMyItems = async (userId) => {
+
     const { data } = await supabase
       .from("listings")
       .select("*")
@@ -70,6 +81,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // FILTERS
   // =========================
   useEffect(() => {
+
     let temp = [...listings];
 
     if (category) {
@@ -105,12 +117,14 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
     }
 
     setFiltered(temp);
+
   }, [listings, category, priceRange, status]);
 
   // =========================
-  // MARK AS SOLD
+  // MARK SOLD
   // =========================
   const markAsSold = async (id) => {
+
     await supabase
       .from("listings")
       .update({ is_sold: true })
@@ -120,9 +134,10 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   };
 
   // =========================
-  // MARK AS TRADED
+  // MARK TRADED
   // =========================
   const markAsTraded = async (id) => {
+
     await supabase
       .from("listings")
       .update({ is_traded: true })
@@ -135,6 +150,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // DELETE
   // =========================
   const handleDelete = async (id) => {
+
     await supabase
       .from("listings")
       .delete()
@@ -144,9 +160,10 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   };
 
   // =========================
-  // OPEN TRADE MODAL
+  // OPEN TRADE
   // =========================
   const handleTrade = (item) => {
+
     setTradeItem(item);
 
     if (user) {
@@ -158,6 +175,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // SEND TRADE
   // =========================
   const sendTrade = async () => {
+
     if (!selectedItem) {
       return alert("Select your item!");
     }
@@ -188,7 +206,9 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
   // LOGOUT
   // =========================
   const handleLogout = async () => {
+
     await supabase.auth.signOut();
+
     window.location.href = "/";
   };
 
@@ -205,6 +225,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
       ========================= */}
       {tradeItem && (
         <div className="modal">
+
           <div className="modal-content">
 
             <h2>Trade Offer</h2>
@@ -215,30 +236,40 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
                 setSelectedItem(e.target.value)
               }
             >
+
               <option value="">
                 Select your item
               </option>
 
               {myItems.map((i) => (
-                <option key={i.id} value={i.id}>
+                <option
+                  key={i.id}
+                  value={i.id}
+                >
                   {i.title}
                 </option>
               ))}
+
             </select>
 
             <div className="modal-actions">
+
               <button onClick={sendTrade}>
                 Send
               </button>
 
               <button
-                onClick={() => setTradeItem(null)}
+                onClick={() =>
+                  setTradeItem(null)
+                }
               >
                 Cancel
               </button>
+
             </div>
 
           </div>
+
         </div>
       )}
 
@@ -255,9 +286,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
         />
       )}
 
-      {/* =========================
-          SIDEBAR
-      ========================= */}
+      {/* SIDEBAR */}
       <div className="sidebar">
 
         <h2 className="logo">
@@ -284,9 +313,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
 
       </div>
 
-      {/* =========================
-          MAIN
-      ========================= */}
+      {/* MAIN */}
       <div className="main">
 
         {/* TOPBAR */}
@@ -306,6 +333,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
               + Add Listing
             </button>
 
+            {/* AVATAR */}
             <div
               className="avatar"
               onClick={() =>
@@ -315,18 +343,23 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
               {user?.email?.[0]?.toUpperCase() || "U"}
             </div>
 
+            {/* DROPDOWN */}
             {showMenu && (
               <div className="dropdown">
-                <p onClick={handleLogout}>
+
+                <p onClick={goProfile}>
                   My Profile
                 </p>
+
                 <p onClick={handleLogout}>
                   Logout
                 </p>
+
               </div>
             )}
 
           </div>
+
         </div>
 
         {/* TITLE */}
@@ -336,15 +369,14 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
 
         <div className="content">
 
-          {/* =========================
-              FILTERS
-          ========================= */}
+          {/* FILTERS */}
           <div className="filters">
 
             <h3>Filters</h3>
 
             {/* CATEGORY */}
             <div className="filter-group">
+
               <p>Category</p>
 
               <button
@@ -372,14 +404,18 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
               </button>
 
               <button
-                onClick={() => setCategory("")}
+                onClick={() =>
+                  setCategory("")
+                }
               >
                 Clear
               </button>
+
             </div>
 
             {/* PRICE */}
             <div className="filter-group">
+
               <p>Price</p>
 
               <button
@@ -413,10 +449,12 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
               >
                 Clear
               </button>
+
             </div>
 
             {/* STATUS */}
             <div className="filter-group">
+
               <p>Status</p>
 
               <button
@@ -444,20 +482,22 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
               </button>
 
               <button
-                onClick={() => setStatus("")}
+                onClick={() =>
+                  setStatus("")
+                }
               >
                 Clear
               </button>
+
             </div>
 
           </div>
 
-          {/* =========================
-              PRODUCTS
-          ========================= */}
+          {/* PRODUCTS */}
           <div className="products">
 
             {displayItems.map((item) => (
+
               <div
                 className="product-card"
                 key={item.id}
@@ -493,7 +533,6 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
                   {user?.id === item.user_id ? (
                     <>
 
-                      {/* ✅ FIXED EDIT BUTTON */}
                       <button
                         onClick={() =>
                           setEditItem(item.id)
@@ -560,12 +599,15 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
                 </div>
 
               </div>
+
             ))}
 
           </div>
 
-        </div>;
+        </div>
+
       </div>
+
     </div>
   );
 };

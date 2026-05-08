@@ -1,39 +1,60 @@
+// Signup.js
+
 import React, { useState } from "react";
 import { supabase } from "./supabaseClient";
 import "./Signup.css";
 
 const Signup = ({ goBack }) => {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const [fullName, setFullName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
 
   const handleSignup = async () => {
+
     if (!fullName || !email || !password) {
+
       alert("Please fill all fields");
+
       return;
     }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name: fullName,
+    const { data, error } =
+      await supabase.auth.signUp({
+
+        email,
+        password,
+
+        options: {
+          data: {
+            name: fullName,
+          },
         },
-      },
-    });
+      });
 
     if (error) {
+
       alert(error.message);
+
       return;
     }
 
     if (!data?.user) {
-      alert("Check your email to confirm account.");
+
+      alert(
+        "Check your email to confirm account."
+      );
+
       return;
     }
 
     alert("Signup successful!");
+
     goBack();
   };
 
@@ -42,36 +63,63 @@ const Signup = ({ goBack }) => {
 
       <div className="signup-card">
 
-        <h2>JOIN THE HUB</h2>
-        <p className="subtitle">Create your marketplace account</p>
+        {/* BACK BUTTON */}
+        <button
+          className="signup-back-btn"
+          onClick={goBack}
+        >
+          ← Back
+        </button>
 
+        {/* TITLE */}
+        <h2>JOIN THE HUB</h2>
+
+        <p className="subtitle">
+          Create your marketplace account
+        </p>
+
+        {/* FULL NAME */}
         <label>Full Name</label>
+
         <input
           type="text"
           placeholder="Juan Dela Cruz"
-          onChange={(e) => setFullName(e.target.value)}
+          value={fullName}
+          onChange={(e) =>
+            setFullName(e.target.value)
+          }
         />
 
+        {/* EMAIL */}
         <label>Email</label>
+
         <input
           type="email"
           placeholder="student@gmail.com"
-          onChange={(e) => setEmail(e.target.value)}
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
         />
 
+        {/* PASSWORD */}
         <label>Password</label>
+
         <input
           type="password"
           placeholder="••••••••"
-          onChange={(e) => setPassword(e.target.value)}
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
         />
 
-        <button className="signup-btn" onClick={handleSignup}>
+        {/* SIGNUP BUTTON */}
+        <button
+          className="signup-btn"
+          onClick={handleSignup}
+        >
           CREATE ACCOUNT
-        </button>
-
-        <button className="back-btn" onClick={goBack}>
-          ← Back
         </button>
 
       </div>

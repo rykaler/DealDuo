@@ -1,5 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+// =========================
+// AdminDashboard.js
+// =========================
+
+import React, {
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+
 import { supabase } from "./supabaseClient";
+
 import "./Admin.css";
 
 import {
@@ -12,7 +22,10 @@ import {
   Legend,
 } from "chart.js";
 
-import { Bar, Pie } from "react-chartjs-2";
+import {
+  Bar,
+  Pie,
+} from "react-chartjs-2";
 
 ChartJS.register(
   BarElement,
@@ -23,31 +36,59 @@ ChartJS.register(
   Legend
 );
 
-const AdminDashboard = ({ goBack }) => {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [loading, setLoading] = useState(false);
+const AdminDashboard = ({
+  goBack,
+}) => {
+
+  const [activeTab, setActiveTab] =
+    useState("dashboard");
+
+  const [loading, setLoading] =
+    useState(false);
 
   const lastRunRef = useRef(null);
 
-  const [stats, setStats] = useState({
-    users: 0,
-    reports: 0,
-    messages: 0,
-    suspended: 0,
-    trades: 0,
-    sold: 0,
-  });
+  // =========================
+  // STATS
+  // =========================
+  const [stats, setStats] =
+    useState({
+      users: 0,
+      reports: 0,
+      messages: 0,
+      suspended: 0,
+      trades: 0,
+      sold: 0,
+      blockedUsers: 0,
+    });
 
-  const [transactions, setTransactions] = useState([]);
-  const [soldItems, setSoldItems] = useState([]);
-  const [reportsList, setReportsList] = useState([]);
-  const [chartData, setChartData] = useState(null);
+  // =========================
+  // DATA
+  // =========================
+  const [transactions, setTransactions] =
+    useState([]);
 
+  const [soldItems, setSoldItems] =
+    useState([]);
+
+  const [reportsList, setReportsList] =
+    useState([]);
+
+  const [blockedUsers, setBlockedUsers] =
+    useState([]);
+
+  const [chartData, setChartData] =
+    useState(null);
+
+  // =========================
+  // INIT
+  // =========================
   useEffect(() => {
     init();
   }, []);
 
   const init = async () => {
+
     setLoading(true);
 
     await fetchAll();
@@ -56,45 +97,86 @@ const AdminDashboard = ({ goBack }) => {
   };
 
   const fetchAll = async () => {
+
     await fetchStats();
+
     await fetchTransactions();
+
     await fetchSoldItems();
+
     await fetchReports();
+
+    await fetchBlockedUsers();
   };
 
-  // ======================
-  // STATS
-  // ======================
+  // =========================
+  // FETCH STATS
+  // =========================
   const fetchStats = async () => {
 
-    const { count: users } = await supabase
-      .from("users")
-      .select("*", { count: "exact", head: true });
+    const { count: users } =
+      await supabase
+        .from("users")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
 
-    const { count: reports } = await supabase
-      .from("reports")
-      .select("*", { count: "exact", head: true });
+    const { count: reports } =
+      await supabase
+        .from("reports")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
 
-    const { count: messages } = await supabase
-      .from("messages")
-      .select("*", { count: "exact", head: true });
+    const { count: messages } =
+      await supabase
+        .from("messages")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
 
-    const { count: suspended } = await supabase
-      .from("users")
-      .select("*", { count: "exact", head: true })
-      .eq("is_suspended", true);
+    const { count: suspended } =
+      await supabase
+        .from("users")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("is_suspended", true);
 
-    // ✅ FIXED TRADES COUNT
-    const { count: trades } = await supabase
-      .from("trades")
-      .select("*", { count: "exact", head: true })
-      .in("status", ["completed", "accepted", "success"]);
+    const { count: trades } =
+      await supabase
+        .from("trades")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .in("status", [
+          "completed",
+          "accepted",
+          "success",
+        ]);
 
-    // ✅ SOLD ITEMS
-    const { count: sold } = await supabase
-      .from("listings")
-      .select("*", { count: "exact", head: true })
-      .eq("is_sold", true);
+    const { count: sold } =
+      await supabase
+        .from("listings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("is_sold", true);
+
+    const {
+      count: blockedUsers,
+    } = await supabase
+      .from("blocked_users")
+      .select("*", {
+        count: "exact",
+        head: true,
+      });
 
     setStats({
       users: users || 0,
@@ -103,6 +185,8 @@ const AdminDashboard = ({ goBack }) => {
       suspended: suspended || 0,
       trades: trades || 0,
       sold: sold || 0,
+      blockedUsers:
+        blockedUsers || 0,
     });
 
     setChartData({
@@ -112,38 +196,49 @@ const AdminDashboard = ({ goBack }) => {
         "Messages",
         "Trades",
         "Sold",
+        "Blocked",
       ],
+
       datasets: [
         {
-          label: "System Overview",
+          label:
+            "System Overview",
+
           data: [
             users || 0,
             reports || 0,
             messages || 0,
             trades || 0,
             sold || 0,
+            blockedUsers || 0,
           ],
+
           backgroundColor: [
             "#4CAF50",
             "#FF5252",
             "#2196F3",
             "#FFC107",
             "#9C27B0",
+            "#ff4d4d",
           ],
         },
       ],
     });
   };
 
-  // ======================
+  // =========================
   // REPORTS
-  // ======================
-  const fetchReports = async () => {
+  // =========================
+  const fetchReports =
+    async () => {
 
-    const { data } = await supabase
-      .from("reports")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } =
+      await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
     if (!data) return;
 
@@ -151,52 +246,74 @@ const AdminDashboard = ({ goBack }) => {
       ...new Set(
         data.flatMap((r) => [
           r.reporter_id,
-          r.reported_id,
+          r.reported_user_id,
         ])
       ),
     ];
 
-    const { data: users } = await supabase
-      .from("users")
-      .select("id, name")
-      .in("id", ids);
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select(
+          "id, name, email"
+        )
+        .in("id", ids);
 
     const map = {};
 
     users?.forEach((u) => {
-      map[u.id] = u.name;
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
     });
 
     setReportsList(
       data.map((r) => ({
         id: r.id,
+
         reason: r.reason,
-        severity: r.severity,
+
+        severity:
+          r.severity,
+
         reporterName:
           map[r.reporter_id] ||
-          r.reporter_id?.slice(0, 6),
+          r.reporter_id?.slice(
+            0,
+            6
+          ),
 
         reportedName:
-          map[r.reported_id] ||
-          r.reported_id?.slice(0, 6),
+          map[
+            r.reported_user_id
+          ] ||
+          r.reported_user_id?.slice(
+            0,
+            6
+          ),
       }))
     );
   };
 
-  // ======================
+  // =========================
   // TRANSACTIONS
-  // ======================
-  const fetchTransactions = async () => {
+  // =========================
+  const fetchTransactions =
+    async () => {
 
-    // ✅ FIXED STATUS FILTER
-    const { data } = await supabase
-      .from("trades")
-      .select("id, sender_id, receiver_id, status")
-      .in("status", [
-        "completed",
-        "accepted",
-        "success",
-      ]);
+    const { data } =
+      await supabase
+        .from("trades")
+        .select(
+          "id, sender_id, receiver_id, status"
+        )
+        .in("status", [
+          "completed",
+          "accepted",
+          "success",
+        ]);
 
     if (!data) return;
 
@@ -209,15 +326,22 @@ const AdminDashboard = ({ goBack }) => {
       ),
     ];
 
-    const { data: users } = await supabase
-      .from("users")
-      .select("id, name")
-      .in("id", ids);
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select(
+          "id, name, email"
+        )
+        .in("id", ids);
 
     const map = {};
 
     users?.forEach((u) => {
-      map[u.id] = u.name;
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
     });
 
     setTransactions(
@@ -237,56 +361,140 @@ const AdminDashboard = ({ goBack }) => {
     );
   };
 
-  // ======================
+  // =========================
   // SOLD ITEMS
-  // ======================
-  const fetchSoldItems = async () => {
+  // =========================
+  const fetchSoldItems =
+    async () => {
 
-    const { data } = await supabase
-      .from("listings")
-      .select("id, title, user_id")
-      .eq("is_sold", true);
+    const { data } =
+      await supabase
+        .from("listings")
+        .select(
+          "id, title, user_id"
+        )
+        .eq("is_sold", true);
 
     if (!data) return;
 
     const ids = [
-      ...new Set(data.map((l) => l.user_id)),
+      ...new Set(
+        data.map(
+          (l) => l.user_id
+        )
+      ),
     ];
 
-    const { data: users } = await supabase
-      .from("users")
-      .select("id, name")
-      .in("id", ids);
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select(
+          "id, name, email"
+        )
+        .in("id", ids);
 
     const map = {};
 
     users?.forEach((u) => {
-      map[u.id] = u.name;
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
     });
 
     setSoldItems(
       data.map((l) => ({
         ...l,
+
         ownerName:
           map[l.user_id] ||
-          l.user_id?.slice(0, 6),
+          l.user_id?.slice(
+            0,
+            6
+          ),
       }))
     );
   };
 
-  // ======================
+  // =========================
+  // BLOCKED USERS
+  // =========================
+  const fetchBlockedUsers =
+    async () => {
+
+    const { data } =
+      await supabase
+        .from("blocked_users")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
+
+    if (!data) return;
+
+    const ids = [
+      ...new Set(
+        data.flatMap((b) => [
+          b.blocker_id,
+          b.blocked_id,
+        ])
+      ),
+    ];
+
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select(
+          "id, name, email"
+        )
+        .in("id", ids);
+
+    const map = {};
+
+    users?.forEach((u) => {
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
+    });
+
+    setBlockedUsers(
+      data.map((b) => ({
+
+        id: b.id,
+
+        blockerName:
+          map[b.blocker_id] ||
+          b.blocker_id?.slice(0, 6),
+
+        blockedName:
+          map[b.blocked_id] ||
+          b.blocked_id?.slice(0, 6),
+
+      }))
+    );
+  };
+
+  // =========================
   // AUTO MODERATION
-  // ======================
-  const runAutoModeration = async () => {
+  // =========================
+  const runAutoModeration =
+    async () => {
 
     const now = Date.now();
 
-    // 5 MINUTE COOLDOWN
     if (
       lastRunRef.current &&
-      now - lastRunRef.current < 300000
+      now -
+        lastRunRef.current <
+        300000
     ) {
-      alert("Wait before running moderation again");
+      alert(
+        "Wait before running moderation again"
+      );
+
       return;
     }
 
@@ -294,9 +502,10 @@ const AdminDashboard = ({ goBack }) => {
 
     setLoading(true);
 
-    const { data } = await supabase
-      .from("reports")
-      .select("*");
+    const { data } =
+      await supabase
+        .from("reports")
+        .select("*");
 
     if (!data) {
       setLoading(false);
@@ -313,38 +522,60 @@ const AdminDashboard = ({ goBack }) => {
 
     data.forEach((r) => {
 
-      if (!map[r.reported_id]) {
-        map[r.reported_id] = {
+      if (
+        !map[
+          r.reported_user_id
+        ]
+      ) {
+        map[
+          r.reported_user_id
+        ] = {
           score: 0,
         };
       }
 
-      map[r.reported_id].score +=
-        severityWeight[r.severity] || 1;
+      map[
+        r.reported_user_id
+      ].score +=
+        severityWeight[
+          r.severity
+        ] || 1;
     });
 
     for (const userId in map) {
 
-      const score = map[userId].score;
+      const score =
+        map[userId].score;
 
-      const { data: user } = await supabase
-        .from("users")
-        .select("is_suspended")
-        .eq("id", userId)
-        .single();
+      const { data: user } =
+        await supabase
+          .from("users")
+          .select(
+            "is_suspended"
+          )
+          .eq("id", userId)
+          .single();
 
-      if (user?.is_suspended) continue;
+      if (
+        user?.is_suspended
+      )
+        continue;
 
-      // HIDE LISTINGS
       if (score >= 8) {
+
         await supabase
           .from("listings")
-          .update({ hidden: true })
-          .eq("user_id", userId);
+          .update({
+            hidden: true,
+          })
+          .eq(
+            "user_id",
+            userId
+          );
       }
 
-      // DISABLE CHAT
       if (score >= 12) {
+
         await supabase
           .from("users")
           .update({
@@ -353,13 +584,16 @@ const AdminDashboard = ({ goBack }) => {
           .eq("id", userId);
       }
 
-      // SUSPEND USER
       if (score >= 20) {
+
         await supabase
           .from("users")
           .update({
             is_suspended: true,
-            suspended_at: new Date(),
+
+            suspended_at:
+              new Date(),
+
             suspension_reason:
               "Auto moderation: high report score",
           })
@@ -369,62 +603,127 @@ const AdminDashboard = ({ goBack }) => {
 
     setLoading(false);
 
-    alert("Moderation completed");
+    alert(
+      "Moderation completed"
+    );
 
     fetchAll();
   };
 
-  // ======================
+  // =========================
   // PIE CHART
-  // ======================
+  // =========================
   const pieData = {
-    labels: ["Trades", "Sold"],
+    labels: [
+      "Trades",
+      "Sold",
+      "Blocked",
+    ],
 
     datasets: [
       {
         data: [
           stats.trades,
           stats.sold,
+          stats.blockedUsers,
         ],
 
         backgroundColor: [
           "#00C853",
           "#FF9800",
+          "#ff4d4d",
         ],
       },
     ],
   };
 
-  // ======================
-  // UI
-  // ======================
   return (
     <div className="app-container">
 
       {/* SIDEBAR */}
       <div className="sidebar">
+
         <h3>Admin</h3>
 
-        <p onClick={() => setActiveTab("dashboard")}>
+        <p
+          className={
+            activeTab === "dashboard"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "dashboard"
+            )
+          }
+        >
           Dashboard
         </p>
 
-        <p onClick={() => setActiveTab("trades")}>
+        <p
+          className={
+            activeTab === "trades"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "trades"
+            )
+          }
+        >
           Trades
         </p>
 
-        <p onClick={() => setActiveTab("sold")}>
+        <p
+          className={
+            activeTab === "sold"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab("sold")
+          }
+        >
           Sold
         </p>
 
-        <p onClick={() => setActiveTab("reports")}>
+        <p
+          className={
+            activeTab === "reports"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "reports"
+            )
+          }
+        >
           Reports
         </p>
+
+        <p
+          className={
+            activeTab === "blocked"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "blocked"
+            )
+          }
+        >
+          🚫 Blocked Users
+        </p>
+
       </div>
 
       {/* MAIN */}
       <div className="dashboard-container">
 
+        {/* HEADER */}
         <div className="dashboard-header">
 
           <h2>
@@ -438,21 +737,30 @@ const AdminDashboard = ({ goBack }) => {
             }}
           >
 
-            <button onClick={runAutoModeration}>
+            <button
+              onClick={
+                runAutoModeration
+              }
+            >
               {loading
                 ? "Running..."
                 : "Run Moderation"}
             </button>
 
-            <button onClick={goBack}>
+            <button
+              onClick={goBack}
+            >
               Logout
             </button>
 
           </div>
+
         </div>
 
         {/* DASHBOARD */}
-        {activeTab === "dashboard" && (
+        {activeTab ===
+          "dashboard" && (
+
           <>
 
             <div className="stats-grid">
@@ -487,121 +795,100 @@ const AdminDashboard = ({ goBack }) => {
                 <p>{stats.sold}</p>
               </div>
 
+              {/* BLOCKED CARD */}
+              <div className="stat-card blocked-card">
+                <h3>
+                  Blocked Users
+                </h3>
+
+                <p>
+                  {stats.blockedUsers}
+                </p>
+              </div>
+
             </div>
 
             {chartData && (
+
               <div className="stats-grid">
 
                 <div className="stat-card">
-                  <Bar data={chartData} />
+                  <Bar
+                    data={chartData}
+                  />
                 </div>
 
                 <div className="stat-card">
-                  <Pie data={pieData} />
+                  <Pie
+                    data={pieData}
+                  />
                 </div>
 
               </div>
+
             )}
 
           </>
         )}
 
-        {/* REPORTS */}
-        {activeTab === "reports" && (
+        {/* BLOCKED USERS PAGE */}
+        {activeTab ===
+          "blocked" && (
+
           <div className="stats-grid">
 
-            {reportsList.map((r) => (
-              <div
-                key={r.id}
-                className="stat-card"
-              >
+            {blockedUsers.length === 0 ? (
 
-                <h3
-                  style={{
-                    color:
-                      r.severity === "high"
-                        ? "red"
-                        : r.severity === "medium"
-                        ? "orange"
-                        : "green",
-                  }}
-                >
-                  {r.severity?.toUpperCase()}
-                </h3>
-
-                <p>
-                  From: {r.reporterName}
-                </p>
-
-                <p>
-                  Against: {r.reportedName}
-                </p>
-
-                <small>
-                  {r.reason}
-                </small>
-
-              </div>
-            ))}
-
-          </div>
-        )}
-
-        {/* TRADES */}
-        {activeTab === "trades" && (
-          <div className="stats-grid">
-
-            {transactions.map((t) => (
-              <div
-                key={t.id}
-                className="stat-card"
-              >
+              <div className="stat-card blocked-card">
 
                 <h3>
-                  Trade #{t.id}
+                  No blocked users
                 </h3>
 
-                <p>
-                  Sender: {t.senderName}
-                </p>
-
-                <p>
-                  Receiver: {t.receiverName}
-                </p>
-
-                <small>
-                  Status: {t.status}
-                </small>
-
               </div>
-            ))}
 
-          </div>
-        )}
+            ) : (
 
-        {/* SOLD */}
-        {activeTab === "sold" && (
-          <div className="stats-grid">
+              blockedUsers.map((b) => (
 
-            {soldItems.map((s) => (
-              <div
-                key={s.id}
-                className="stat-card"
-              >
+                <div
+                  key={b.id}
+                  className="stat-card blocked-card"
+                >
 
-                <h3>{s.title}</h3>
+                  <h3>
+                    Blocked User
+                  </h3>
 
-                <p>
-                  Owner: {s.ownerName}
-                </p>
+                  <p>
+                    Blocked By
+                  </p>
 
-              </div>
-            ))}
+                  <small>
+                    {b.blockerName}
+                  </small>
+
+                  <br />
+                  <br />
+
+                  <p>
+                    User Blocked
+                  </p>
+
+                  <small>
+                    {b.blockedName}
+                  </small>
+
+                </div>
+
+              ))
+            )}
 
           </div>
         )}
 
       </div>
+
     </div>
   );
 };

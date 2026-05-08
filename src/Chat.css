@@ -1,3 +1,7 @@
+/* =========================
+   CHAT.CSS
+========================= */
+
 /* PAGE */
 .chat-page {
   display: flex;
@@ -26,6 +30,7 @@
 
 .chat-header h3 {
   margin: 0;
+  color: white;
 }
 
 .chat-header button {
@@ -36,21 +41,22 @@
   cursor: pointer;
 }
 
-/* REPORT BUTTON */
+/* REPORT */
 .report-wrap {
   position: relative;
-  display: inline-block;
 }
 
+/* REPORT BUTTON */
 .report-btn {
   background: transparent;
   border: 1px solid #D5AD36;
   color: #D5AD36;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  transition: 0.2s;
+  font-weight: 600;
+  transition: 0.25s;
 }
 
 .report-btn:hover {
@@ -58,33 +64,50 @@
   color: #0A1B2A;
 }
 
-/* REPORT MENU */
+/* MENU */
 .report-menu {
-  display: none;
   position: absolute;
   right: 0;
-  top: 42px;
+  top: 50px;
   background: #081521;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
   overflow: hidden;
   z-index: 100;
-  min-width: 180px;
+  min-width: 240px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-.report-wrap:hover .report-menu {
+/* SEVERITY */
+.severity-wrap {
+  padding: 14px;
+}
+
+.severity-wrap label {
   display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #D5AD36;
 }
 
+.severity-wrap select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+/* MENU BUTTONS */
 .report-menu button {
   width: 100%;
-  padding: 12px;
-  background: none;
+  padding: 15px;
   border: none;
+  background: transparent;
   color: white;
   text-align: left;
   cursor: pointer;
-  font-size: 14px;
+  transition: 0.2s;
 }
 
 .report-menu button:hover {
@@ -92,12 +115,21 @@
   color: #0A1B2A;
 }
 
-/* SUSPENSION BANNER */
+/* BANNER */
 .ban-banner {
   background: #ff3b3b;
   color: white;
   padding: 12px;
   text-align: center;
+  font-weight: bold;
+}
+
+/* BLOCKED */
+.block-banner {
+  background: #ff4d4d;
+  color: white;
+  text-align: center;
+  padding: 12px;
   font-weight: bold;
 }
 
@@ -111,14 +143,14 @@
   gap: 10px;
 }
 
-/* EMPTY STATE */
+/* EMPTY */
 .no-msg {
   text-align: center;
   color: #94a3b8;
   margin-top: 30px;
 }
 
-/* MESSAGES */
+/* MY MSG */
 .my-msg {
   align-self: flex-end;
   background: #D5AD36;
@@ -126,9 +158,9 @@
   padding: 10px 14px;
   border-radius: 12px 12px 0 12px;
   max-width: 60%;
-  word-wrap: break-word;
 }
 
+/* THEIR MSG */
 .their-msg {
   align-self: flex-start;
   background: #081521;
@@ -136,7 +168,6 @@
   padding: 10px 14px;
   border-radius: 12px 12px 12px 0;
   max-width: 60%;
-  word-wrap: break-word;
 }
 
 /* INPUT */
@@ -154,11 +185,6 @@
   border: none;
   background: #0A1B2A;
   color: white;
-  outline: none;
-}
-
-.chat-input input::placeholder {
-  color: #94a3b8;
 }
 
 .chat-input button {
@@ -169,16 +195,6 @@
   cursor: pointer;
   color: #0A1B2A;
   font-weight: bold;
-  transition: 0.2s;
-}
-
-.chat-input button:hover {
-  opacity: 0.9;
-}
-
-.chat-input button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* TOAST */
@@ -190,6 +206,4 @@
   color: white;
   padding: 12px 18px;
   border-radius: 8px;
-  font-size: 14px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }

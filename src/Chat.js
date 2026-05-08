@@ -1,20 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+// =========================
+// CHAT.JS
+// =========================
+
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import { supabase }
+from "./supabaseClient";
+
 import "./Chat.css";
 
-const Chat = ({ receiverId, goBack }) => {
+const Chat = ({
+  receiverId,
+  goBack,
+}) => {
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] =
+    useState(null);
 
-  const [receiver, setReceiver] = useState(null);
+  const [receiver, setReceiver] =
+    useState(null);
 
-  const [userStatus, setUserStatus] = useState(null);
+  const [messages, setMessages] =
+    useState([]);
 
-  const [messages, setMessages] = useState([]);
+  const [text, setText] =
+    useState("");
 
-  const [text, setText] = useState("");
+  const [toast, setToast] =
+    useState("");
 
-  const [toast, setToast] = useState("");
+  const [menuOpen, setMenuOpen] =
+    useState(false);
+
+  const [severity, setSeverity] =
+    useState("low");
+
+  const [isBlocked, setIsBlocked] =
+    useState(false);
 
   useEffect(() => {
     getUser();
@@ -22,65 +47,73 @@ const Chat = ({ receiverId, goBack }) => {
 
   const getUser = async () => {
 
-    const { data } = await supabase.auth.getUser();
+    const { data } =
+      await supabase.auth.getUser();
 
     setUser(data.user);
 
     if (data.user) {
 
-      // GET CURRENT USER STATUS
-      const { data: status } = await supabase
-        .from("users")
-        .select(
-          "is_suspended, chat_disabled, suspension_reason"
-        )
-        .eq("id", data.user.id)
-        .single();
-
-      setUserStatus(status);
-
-      // GET RECEIVER INFO
-      const { data: receiverData } = await supabase
-        .from("users")
-        .select("email")
-        .eq("id", receiverId)
-        .single();
+      const { data: receiverData } =
+        await supabase
+          .from("users")
+          .select("name,email")
+          .eq("id", receiverId)
+          .single();
 
       setReceiver(receiverData);
+
+      checkBlocked(
+        data.user.id
+      );
     }
   };
 
+  const checkBlocked =
+    async (myId) => {
+
+    const { data } =
+      await supabase
+        .from("blocked_users")
+        .select("*")
+        .or(
+          `and(blocker_id.eq.${myId},blocked_id.eq.${receiverId}),and(blocker_id.eq.${receiverId},blocked_id.eq.${myId})`
+        );
+
+    setIsBlocked(
+      data?.length > 0
+    );
+  };
+
   useEffect(() => {
-    if (user && receiverId) {
+    if (user) {
       fetchMessages();
     }
-  }, [user, receiverId]);
+  }, [user]);
 
-  const fetchMessages = async () => {
+  const fetchMessages =
+    async () => {
 
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`
-      )
-      .order("created_at", {
-        ascending: true,
-      });
+    const { data } =
+      await supabase
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`
+        )
+        .order("created_at", {
+          ascending: true,
+        });
 
     setMessages(data || []);
   };
 
-  // BLOCK IF RESTRICTED
-  const isBlocked =
-    userStatus?.is_suspended ||
-    userStatus?.chat_disabled;
-
-  const sendMessage = async () => {
+  const sendMessage =
+    async () => {
 
     if (isBlocked) {
       return showToast(
-        "⚠ You are restricted from sending messages"
+        "🚫 Chat blocked"
       );
     }
 
@@ -99,22 +132,33 @@ const Chat = ({ receiverId, goBack }) => {
     fetchMessages();
   };
 
-  // REPORT
-  const reportUser = async () => {
+  const reportUser =
+    async () => {
 
     await supabase
       .from("reports")
       .insert({
         reporter_id: user.id,
-        reported_user_id: receiverId,
-        reason: "User reported from chat",
+        reported_user_id:
+          receiverId,
+        severity,
+        reason:
+          severity === "high"
+            ? "Harassment / Scam"
+            : severity === "medium"
+            ? "Misleading"
+            : "Spam",
       });
 
-    showToast("⚠ User reported");
+    showToast(
+      "⚠ Report submitted"
+    );
+
+    setMenuOpen(false);
   };
 
-  // BLOCK
-  const blockUser = async () => {
+  const blockUser =
+    async () => {
 
     await supabase
       .from("blocked_users")
@@ -123,7 +167,13 @@ const Chat = ({ receiverId, goBack }) => {
         blocked_id: receiverId,
       });
 
-    showToast("🚫 User blocked");
+    setIsBlocked(true);
+
+    showToast(
+      "🚫 User blocked"
+    );
+
+    setMenuOpen(false);
   };
 
   const showToast = (msg) => {
@@ -143,15 +193,16 @@ const Chat = ({ receiverId, goBack }) => {
 
         <div className="header-left">
 
-          <button onClick={goBack}>
+          <button
+            onClick={goBack}
+          >
             ←
           </button>
 
-          {/* ✅ USER NAME */}
           <h3>
-            {receiver?.email
-              ? receiver.email.split("@")[0]
-              : "Conversation"}
+            {receiver?.name ||
+              receiver?.email?.split("@")[0] ||
+              "Conversation"}
           </h3>
 
         </div>
@@ -159,51 +210,97 @@ const Chat = ({ receiverId, goBack }) => {
         {/* REPORT */}
         <div className="report-wrap">
 
-          <button className="report-btn">
+          <button
+            className="report-btn"
+            onClick={() =>
+              setMenuOpen(
+                !menuOpen
+              )
+            }
+          >
             Report
           </button>
 
-          <div className="report-menu">
+          {menuOpen && (
 
-            <button onClick={reportUser}>
-              ⚠ Report User
-            </button>
+            <div className="report-menu">
 
-            <button onClick={blockUser}>
-              🚫 Block User
-            </button>
+              <div className="severity-wrap">
 
-          </div>
+                <label>
+                  Severity
+                </label>
+
+                <select
+                  value={
+                    severity
+                  }
+                  onChange={(e) =>
+                    setSeverity(
+                      e.target.value
+                    )
+                  }
+                >
+                  <option value="low">
+                    Spam
+                  </option>
+
+                  <option value="medium">
+                    Misleading
+                  </option>
+
+                  <option value="high">
+                    Scam /
+                    Harassment
+                  </option>
+
+                </select>
+
+              </div>
+
+              <button
+                onClick={
+                  reportUser
+                }
+              >
+                ⚠ Report User
+              </button>
+
+              <button
+                onClick={
+                  blockUser
+                }
+              >
+                🚫 Block User
+              </button>
+
+            </div>
+          )}
 
         </div>
 
       </div>
 
-      {/* WARNING */}
-      {userStatus?.is_suspended && (
-        <div className="ban-banner">
-          ⚠ Your account is suspended
-          <br />
-          <small>
-            {userStatus.suspension_reason}
-          </small>
+      {/* BLOCKED */}
+      {isBlocked && (
+
+        <div className="block-banner">
+          🚫 One of you blocked
+          this conversation
         </div>
+
       )}
 
-      {userStatus?.chat_disabled &&
-        !userStatus?.is_suspended && (
-          <div className="ban-banner">
-            ⚠ Chat feature is temporarily disabled
-          </div>
-        )}
-
-      {/* CHAT BOX */}
+      {/* CHAT */}
       <div className="chat-box">
 
-        {messages.length === 0 && (
+        {messages.length ===
+          0 && (
+
           <div className="no-msg">
             No messages yet
           </div>
+
         )}
 
         {messages.map((msg) => (
@@ -211,7 +308,8 @@ const Chat = ({ receiverId, goBack }) => {
           <div
             key={msg.id}
             className={
-              msg.sender_id === user?.id
+              msg.sender_id ===
+              user?.id
                 ? "my-msg"
                 : "their-msg"
             }
@@ -228,20 +326,28 @@ const Chat = ({ receiverId, goBack }) => {
 
         <input
           value={text}
-          disabled={isBlocked}
+          disabled={
+            isBlocked
+          }
           onChange={(e) =>
-            setText(e.target.value)
+            setText(
+              e.target.value
+            )
           }
           placeholder={
             isBlocked
               ? "Messaging disabled"
-              : "Type a message..."
+              : "Type message..."
           }
         />
 
         <button
-          onClick={sendMessage}
-          disabled={isBlocked}
+          onClick={
+            sendMessage
+          }
+          disabled={
+            isBlocked
+          }
         >
           Send
         </button>

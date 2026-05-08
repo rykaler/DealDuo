@@ -1,86 +1,190 @@
-/* PAGE BACKGROUND */
+/* =========================
+   PAGE BACKGROUND
+========================= */
+
 .add-page {
-  height: 100vh;
+  min-height: 100vh;
   background: #0A1B2A;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: "Segoe UI", sans-serif;
+  padding: 20px;
 }
 
-/* CARD */
+/* =========================
+   CARD
+========================= */
+
 .add-card {
-  width: 400px;
+  width: 100%;
+  max-width: 430px;
+
   background: #081521;
+
   padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.4);
+
   color: white;
+}
+
+/* =========================
+   TOP BACK BUTTON
+========================= */
+
+.top-back-btn {
+  background: transparent;
+
+  border: none;
+
+  color: #D5AD36;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  margin-bottom: 20px;
+
+  transition: 0.2s;
+
+  padding: 0;
+}
+
+.top-back-btn:hover {
+  opacity: 0.8;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.add-card h2 {
+  color: #D5AD36;
+
+  font-size: 34px;
+
+  font-weight: bold;
+
+  margin-bottom: 6px;
+
   text-align: center;
 }
 
-/* TITLE */
-.add-card h2 {
-  margin-bottom: 5px;
-  color: #D5AD36;
-}
+/* SUBTITLE */
 
 .subtitle {
-  font-size: 13px;
+  font-size: 14px;
+
   color: #94a3b8;
-  margin-bottom: 20px;
+
+  margin-bottom: 25px;
+
+  text-align: center;
 }
 
-/* INPUTS */
+/* =========================
+   FORM INPUTS
+========================= */
+
 .add-card input,
 .add-card select,
 .add-card textarea {
+
   width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 10px;
+
+  padding: 14px;
+
+  margin-bottom: 14px;
+
+  border-radius: 12px;
+
   border: none;
+
   background: #0A1B2A;
+
   color: white;
+
   outline: none;
+
+  font-size: 14px;
+}
+
+/* FILE INPUT */
+
+.add-card input[type="file"] {
+  padding: 10px;
+  cursor: pointer;
 }
 
 /* TEXTAREA */
+
 .add-card textarea {
   resize: none;
-  height: 80px;
+  height: 100px;
 }
 
-/* SUBMIT BUTTON */
+/* PLACEHOLDER */
+
+.add-card input::placeholder,
+.add-card textarea::placeholder {
+  color: #6b7280;
+}
+
+/* =========================
+   SUBMIT BUTTON
+========================= */
+
 .submit-btn {
+
   width: 100%;
-  padding: 12px;
+
+  padding: 14px;
+
   background: #D5AD36;
+
   color: #0A1B2A;
+
   border: none;
-  border-radius: 10px;
+
+  border-radius: 12px;
+
   font-weight: bold;
+
+  font-size: 15px;
+
   cursor: pointer;
-  margin-top: 10px;
+
+  margin-top: 5px;
+
+  transition: 0.25s;
 }
 
 .submit-btn:hover {
   opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-/* BACK BUTTON */
-.back-btn {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background: transparent;
-  border: 1px solid #D5AD36;
-  color: #D5AD36;
-  border-radius: 10px;
-  cursor: pointer;
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.back-btn:hover {
-  background: #D5AD36;
-  color: #0A1B2A;
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 500px) {
+
+  .add-card {
+    padding: 22px;
+  }
+
+  .add-card h2 {
+    font-size: 28px;
+  }
+
 }

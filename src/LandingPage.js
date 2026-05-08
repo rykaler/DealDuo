@@ -14,7 +14,7 @@ const LandingPage = ({
       <div className="hero-card">
 
         {/* LOGO */}
-        <h1 className="logo">
+        <h1 className="logo-landing">
           DEAL<span>DUO</span>
         </h1>
 

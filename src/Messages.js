@@ -3,9 +3,11 @@ import { supabase } from "./supabaseClient";
 import "./Messages.css";
 
 const Messages = ({ goBack, openChat }) => {
+
   const [user, setUser] = useState(null);
+
   const [conversations, setConversations] = useState([]);
-  const [reportUser, setReportUser] = useState(null);
+
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -13,39 +15,74 @@ const Messages = ({ goBack, openChat }) => {
   }, []);
 
   useEffect(() => {
-    if (user) fetchMessages();
+    if (user) {
+      fetchMessages();
+    }
   }, [user]);
 
+  /* GET CURRENT USER */
   const getUser = async () => {
-    const { data } = await supabase.auth.getUser();
+
+    const { data } =
+      await supabase.auth.getUser();
+
     setUser(data.user);
   };
 
+  /* FETCH MESSAGES + USER NAMES */
   const fetchMessages = async () => {
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .order("created_at", { ascending: false });
 
-    if (!data) return;
+    const { data: messages } =
+      await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
+
+    if (!messages) return;
 
     const unique = {};
 
-    data.forEach((msg) => {
-      const other =
+    for (const msg of messages) {
+
+      const otherUserId =
         msg.sender_id === user.id
           ? msg.receiver_id
           : msg.sender_id;
 
-      if (!unique[other]) unique[other] = msg;
-    });
+      if (!unique[otherUserId]) {
 
-    setConversations(Object.values(unique));
+        /* GET USER NAME */
+        const { data: userInfo } =
+          await supabase
+            .from("users")
+            .select("name")
+            .eq("id", otherUserId)
+            .single();
+
+        unique[otherUserId] = {
+          ...msg,
+          otherUserId,
+          otherUserName:
+            userInfo?.name || "Unknown User",
+        };
+      }
+    }
+
+    setConversations(
+      Object.values(unique)
+    );
   };
 
+  /* TOAST */
   const showToast = (message) => {
+
     setToast(message);
-    setTimeout(() => setToast(""), 3000);
+
+    setTimeout(() => {
+      setToast("");
+    }, 3000);
   };
 
   return (
@@ -53,59 +90,83 @@ const Messages = ({ goBack, openChat }) => {
 
       <div className="messages-sidebar">
 
+        {/* HEADER */}
         <div className="messages-header">
-          <button onClick={goBack}>←</button>
+
+          <button onClick={goBack}>
+            ←
+          </button>
+
           <h2>Messages</h2>
+
         </div>
 
+        {/* CONVERSATIONS */}
         <div className="messages-list">
 
           {conversations.map((msg) => {
-            const otherUser =
-              msg.sender_id === user.id
-                ? msg.receiver_id
-                : msg.sender_id;
 
             return (
-              <div key={msg.id} className="message-item">
+
+              <div
+                key={msg.id}
+                className="message-item"
+              >
 
                 <div
                   className="message-left"
-                  onClick={() => openChat(otherUser)}
+                  onClick={() =>
+                    openChat(msg.otherUserId)
+                  }
                 >
+
+                  {/* AVATAR */}
                   <div className="avatar">
-                    {otherUser?.slice(0, 1)}
+
+                    {msg.otherUserName
+                      ?.slice(0, 1)
+                      .toUpperCase()}
+
                   </div>
 
+                  {/* INFO */}
                   <div className="message-info">
-                    <p>{otherUser}</p>
-                    <small>{msg.text}</small>
-                  </div>
-                </div>
 
-                <button
-                  className="report-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setReportUser(otherUser);
-                  }}
-                >
-                  ⚠
-                </button>
+                    <p>
+                      {msg.otherUserName}
+                    </p>
+
+                    <small>
+                      {msg.text}
+                    </small>
+
+                  </div>
+
+                </div>
 
               </div>
             );
           })}
 
         </div>
+
       </div>
 
+      {/* RIGHT SIDE */}
       <div className="chat-preview">
-        <h3>Select a conversation</h3>
+
+        <h3>
+          Select a conversation
+        </h3>
+
       </div>
 
       {/* TOAST */}
-      {toast && <div className="toast">{toast}</div>}
+      {toast && (
+        <div className="toast">
+          {toast}
+        </div>
+      )}
 
     </div>
   );

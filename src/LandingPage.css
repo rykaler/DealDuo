@@ -1,40 +1,28 @@
 /* PAGE */
 .landing-page {
-  width: 100%;
   height: 100vh;
-
   background: #0A1B2A;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-family: "Segoe UI", sans-serif;
-
-  overflow: hidden;
 }
 
-/* HERO CARD */
+/* CARD */
 .hero-card {
   text-align: center;
-
-  width: 100%;
+  padding: 40px;
+  border-radius: 16px;
 }
 
 /* LOGO */
 .logo {
-
-  font-size: 320px;
-
-  font-weight: 900;
-
+  font-size: 100px;
+  font-weight: 800;
   color: white;
-
-  letter-spacing: 6px;
-
+  letter-spacing: 3px;
   margin: 0;
-
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .logo span {
@@ -43,117 +31,53 @@
 
 /* TAGLINE */
 .tagline {
-
-  margin-top: 30px;
-
-  font-size: 28px;
-
+  margin-top: 10px;
+  font-size: 16px;
   color: #D5AD36;
-
-  letter-spacing: 7px;
-
-  font-weight: 500;
+  letter-spacing: 3px;
 }
 
-/* BUTTON AREA */
+/* SUBTEXT */
+.subtext {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* BUTTONS */
 .buttons {
-
-  margin-top: 55px;
-
+  margin-top: 25px;
   display: flex;
-
-  gap: 20px;
-
+  gap: 12px;
   justify-content: center;
 }
 
-/* LOGIN BUTTON */
 .landing-login-btn {
-
-  padding: 16px 45px;
-
+  padding: 12px 25px;
   border: 1px solid #D5AD36;
-
   background: transparent;
-
   color: #D5AD36;
-
-  border-radius: 12px;
-
-  font-size: 18px;
-
-  font-weight: 700;
-
+  border-radius: 10px;
   cursor: pointer;
-
-  transition: 0.25s;
+  transition: 0.2s;
 }
 
 .landing-login-btn:hover {
-
   background: #D5AD36;
-
   color: #0A1B2A;
 }
 
-/* SIGNUP BUTTON */
 .landing-signup-btn {
-
-  padding: 16px 45px;
-
+  padding: 12px 25px;
   border: 1px solid #D5AD36;
-
   background: transparent;
-
   color: #D5AD36;
-
-  border-radius: 12px;
-
-  font-size: 18px;
-
-  font-weight: 700;
-
+  border-radius: 10px;
   cursor: pointer;
-
-  transition: 0.25s;
+  transition: 0.2s;
 }
 
 .landing-signup-btn:hover {
-
   background: #D5AD36;
-
   color: #0A1B2A;
-}
-
-/* TABLET */
-@media (max-width: 1200px) {
-
-  .logo {
-    font-size: 220px;
-  }
-
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-
-  .logo {
-    font-size: 110px;
-  }
-
-  .tagline {
-    font-size: 14px;
-    letter-spacing: 3px;
-  }
-
-  .buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .landing-login-btn,
-  .landing-signup-btn {
-    width: 220px;
-  }
-
 }

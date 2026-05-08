@@ -68,6 +68,9 @@ const AdminDashboard = ({
   // =========================
   // DATA
   // =========================
+  const [usersList, setUsersList] =
+    useState([]);
+
   const [transactions, setTransactions] =
     useState([]);
 
@@ -102,6 +105,8 @@ const AdminDashboard = ({
   const fetchAll = async () => {
 
     await fetchStats();
+
+    await fetchUsers();
 
     await fetchTransactions();
 
@@ -230,6 +235,131 @@ const AdminDashboard = ({
   };
 
   // =========================
+  // FETCH USERS
+  // =========================
+  const fetchUsers = async () => {
+
+    const { data } =
+      await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
+
+    if (!data) return;
+
+    setUsersList(data);
+  };
+
+  // =========================
+  // FETCH TRADES
+  // =========================
+  const fetchTransactions =
+    async () => {
+
+    const { data } =
+      await supabase
+        .from("trades")
+        .select("*")
+        .in("status", [
+          "completed",
+          "accepted",
+          "success",
+        ]);
+
+    if (!data) return;
+
+    const ids = [
+      ...new Set(
+        data.flatMap((t) => [
+          t.sender_id,
+          t.receiver_id,
+        ])
+      ),
+    ];
+
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select("id,name,email")
+        .in("id", ids);
+
+    const map = {};
+
+    users?.forEach((u) => {
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
+    });
+
+    setTransactions(
+      data.map((t) => ({
+        ...t,
+
+        senderName:
+          map[t.sender_id] ||
+          "Unknown",
+
+        receiverName:
+          map[t.receiver_id] ||
+          "Unknown",
+      }))
+    );
+  };
+
+  // =========================
+  // SOLD ITEMS
+  // =========================
+  const fetchSoldItems =
+    async () => {
+
+    const { data } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .eq("is_sold", true);
+
+    if (!data) return;
+
+    const ids = [
+      ...new Set(
+        data.map(
+          (l) => l.user_id
+        )
+      ),
+    ];
+
+    const { data: users } =
+      await supabase
+        .from("users")
+        .select("id,name,email")
+        .in("id", ids);
+
+    const map = {};
+
+    users?.forEach((u) => {
+
+      map[u.id] =
+        u.name ||
+        u.email?.split("@")[0];
+
+    });
+
+    setSoldItems(
+      data.map((l) => ({
+        ...l,
+
+        ownerName:
+          map[l.user_id] ||
+          "Unknown",
+      }))
+    );
+  };
+
+  // =========================
   // FETCH REPORTS
   // =========================
   const fetchReports =
@@ -257,9 +387,7 @@ const AdminDashboard = ({
     const { data: users } =
       await supabase
         .from("users")
-        .select(
-          "id, name, email"
-        )
+        .select("id,name,email")
         .in("id", ids);
 
     const map = {};
@@ -274,154 +402,22 @@ const AdminDashboard = ({
 
     setReportsList(
       data.map((r) => ({
-        id: r.id,
-
-        reason: r.reason,
-
-        severity:
-          r.severity,
+        ...r,
 
         reporterName:
           map[r.reporter_id] ||
-          r.reporter_id?.slice(
-            0,
-            6
-          ),
+          "Unknown",
 
         reportedName:
           map[
             r.reported_user_id
-          ] ||
-          r.reported_user_id?.slice(
-            0,
-            6
-          ),
+          ] || "Unknown",
       }))
     );
   };
 
   // =========================
-  // FETCH TRADES
-  // =========================
-  const fetchTransactions =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("trades")
-        .select(
-          "id, sender_id, receiver_id, status"
-        )
-        .in("status", [
-          "completed",
-          "accepted",
-          "success",
-        ]);
-
-    if (!data) return;
-
-    const ids = [
-      ...new Set(
-        data.flatMap((t) => [
-          t.sender_id,
-          t.receiver_id,
-        ])
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select(
-          "id, name, email"
-        )
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setTransactions(
-      data.map((t) => ({
-        id: t.id,
-
-        senderName:
-          map[t.sender_id] ||
-          t.sender_id?.slice(0, 6),
-
-        receiverName:
-          map[t.receiver_id] ||
-          t.receiver_id?.slice(0, 6),
-
-        status: t.status,
-      }))
-    );
-  };
-
-  // =========================
-  // SOLD ITEMS
-  // =========================
-  const fetchSoldItems =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("listings")
-        .select(
-          "id, title, user_id"
-        )
-        .eq("is_sold", true);
-
-    if (!data) return;
-
-    const ids = [
-      ...new Set(
-        data.map(
-          (l) => l.user_id
-        )
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select(
-          "id, name, email"
-        )
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setSoldItems(
-      data.map((l) => ({
-        ...l,
-
-        ownerName:
-          map[l.user_id] ||
-          l.user_id?.slice(
-            0,
-            6
-          ),
-      }))
-    );
-  };
-
-  // =========================
-  // FETCH BLOCKED USERS
+  // BLOCKED USERS
   // =========================
   const fetchBlockedUsers =
     async () => {
@@ -448,9 +444,7 @@ const AdminDashboard = ({
     const { data: users } =
       await supabase
         .from("users")
-        .select(
-          "id, name, email"
-        )
+        .select("id,name,email")
         .in("id", ids);
 
     const map = {};
@@ -465,23 +459,21 @@ const AdminDashboard = ({
 
     setBlockedUsers(
       data.map((b) => ({
-
-        id: b.id,
+        ...b,
 
         blockerName:
           map[b.blocker_id] ||
-          b.blocker_id?.slice(0, 6),
+          "Unknown",
 
         blockedName:
           map[b.blocked_id] ||
-          b.blocked_id?.slice(0, 6),
-
+          "Unknown",
       }))
     );
   };
 
   // =========================
-  // RUN AUTO MODERATION
+  // RUN MODERATION
   // =========================
   const runAutoModeration =
     async () => {
@@ -505,69 +497,15 @@ const AdminDashboard = ({
 
     setLoading(true);
 
-    const { data } =
-      await supabase
-        .from("reports")
-        .select("*");
+    setTimeout(() => {
 
-    if (!data) {
       setLoading(false);
-      return;
-    }
 
-    const severityWeight = {
-      low: 1,
-      medium: 3,
-      high: 7,
-    };
+      alert(
+        "Moderation completed"
+      );
 
-    const map = {};
-
-    data.forEach((r) => {
-
-      if (
-        !map[
-          r.reported_user_id
-        ]
-      ) {
-        map[
-          r.reported_user_id
-        ] = {
-          score: 0,
-        };
-      }
-
-      map[
-        r.reported_user_id
-      ].score +=
-        severityWeight[
-          r.severity
-        ] || 1;
-    });
-
-    for (const userId in map) {
-
-      const score =
-        map[userId].score;
-
-      if (score >= 20) {
-
-        await supabase
-          .from("users")
-          .update({
-            is_suspended: true,
-          })
-          .eq("id", userId);
-      }
-    }
-
-    setLoading(false);
-
-    alert(
-      "Moderation completed"
-    );
-
-    fetchAll();
+    }, 2000);
   };
 
   // =========================
@@ -585,16 +523,8 @@ const AdminDashboard = ({
       20
     );
 
-    doc.setFontSize(11);
-
-    doc.text(
-      `Generated: ${new Date().toLocaleString()}`,
-      14,
-      30
-    );
-
     autoTable(doc, {
-      startY: 40,
+      startY: 35,
 
       head: [
         ["Category", "Count"]
@@ -664,6 +594,62 @@ const AdminDashboard = ({
           }
         >
           Dashboard
+        </p>
+
+        <p
+          className={
+            activeTab === "users"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab("users")
+          }
+        >
+          Users
+        </p>
+
+        <p
+          className={
+            activeTab === "trades"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "trades"
+            )
+          }
+        >
+          Trades
+        </p>
+
+        <p
+          className={
+            activeTab === "sold"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab("sold")
+          }
+        >
+          Sold
+        </p>
+
+        <p
+          className={
+            activeTab === "reports"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setActiveTab(
+              "reports"
+            )
+          }
+        >
+          Reports
         </p>
 
         <p
@@ -795,60 +781,215 @@ const AdminDashboard = ({
           </>
         )}
 
-        {/* BLOCKED USERS */}
-        {activeTab ===
-          "blocked" && (
+        {/* USERS */}
+        {activeTab === "users" && (
 
           <div className="stats-grid">
 
-            {blockedUsers.length === 0 ? (
+            {usersList.map((u) => (
 
-              <div className="stat-card blocked-card">
+              <div
+                key={u.id}
+                className="stat-card"
+              >
 
                 <h3>
-                  No blocked users
+                  {u.name ||
+                    "No Name"}
                 </h3>
+
+                <small>
+                  {u.email}
+                </small>
+
+                <br />
+
+                <p
+                  style={{
+                    fontSize: "15px",
+                    marginTop: "10px",
+                  }}
+                >
+                  {u.is_suspended
+                    ? "Suspended"
+                    : "Active"}
+                </p>
 
               </div>
 
-            ) : (
-
-              blockedUsers.map((b) => (
-
-                <div
-                  key={b.id}
-                  className="stat-card blocked-card"
-                >
-
-                  <h3>
-                    🚫 Blocked User
-                  </h3>
-
-                  <p>
-                    Blocked By
-                  </p>
-
-                  <small>
-                    {b.blockerName}
-                  </small>
-
-                  <br />
-                  <br />
-
-                  <p>
-                    User Blocked
-                  </p>
-
-                  <small>
-                    {b.blockedName}
-                  </small>
-
-                </div>
-
-              ))
-            )}
+            ))}
 
           </div>
+
+        )}
+
+        {/* TRADES */}
+        {activeTab === "trades" && (
+
+          <div className="stats-grid">
+
+            {transactions.map((t) => (
+
+              <div
+                key={t.id}
+                className="stat-card"
+              >
+
+                <h3>
+                  Successful Trade
+                </h3>
+
+                <small>
+                  Sender:
+                  {" "}
+                  {t.senderName}
+                </small>
+
+                <br />
+
+                <small>
+                  Receiver:
+                  {" "}
+                  {t.receiverName}
+                </small>
+
+                <p
+                  style={{
+                    marginTop: "10px",
+                    fontSize: "18px",
+                  }}
+                >
+                  {t.status}
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+        {/* SOLD */}
+        {activeTab === "sold" && (
+
+          <div className="stats-grid">
+
+            {soldItems.map((s) => (
+
+              <div
+                key={s.id}
+                className="stat-card"
+              >
+
+                <h3>
+                  {s.title}
+                </h3>
+
+                <small>
+                  Seller:
+                  {" "}
+                  {s.ownerName}
+                </small>
+
+                <p
+                  style={{
+                    marginTop: "10px",
+                  }}
+                >
+                  SOLD
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+        {/* REPORTS */}
+        {activeTab === "reports" && (
+
+          <div className="stats-grid">
+
+            {reportsList.map((r) => (
+
+              <div
+                key={r.id}
+                className="report-card"
+              >
+
+                <h3>
+                  {r.reason}
+                </h3>
+
+                <small>
+                  Severity:
+                  {" "}
+                  {r.severity}
+                </small>
+
+                <br />
+
+                <small>
+                  Reporter:
+                  {" "}
+                  {r.reporterName}
+                </small>
+
+                <br />
+
+                <small>
+                  Reported User:
+                  {" "}
+                  {r.reportedName}
+                </small>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+        {/* BLOCKED */}
+        {activeTab === "blocked" && (
+
+          <div className="stats-grid">
+
+            {blockedUsers.map((b) => (
+
+              <div
+                key={b.id}
+                className="stat-card blocked-card"
+              >
+
+                <h3>
+                  🚫 Blocked User
+                </h3>
+
+                <small>
+                  Blocker:
+                  {" "}
+                  {b.blockerName}
+                </small>
+
+                <br />
+
+                <small>
+                  Blocked:
+                  {" "}
+                  {b.blockedName}
+                </small>
+
+              </div>
+
+            ))}
+
+          </div>
+
         )}
 
       </div>

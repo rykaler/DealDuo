@@ -318,6 +318,9 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
             {showMenu && (
               <div className="dropdown">
                 <p onClick={handleLogout}>
+                  My Profile
+                </p>
+                <p onClick={handleLogout}>
                   Logout
                 </p>
               </div>
@@ -561,7 +564,7 @@ const Dashboard = ({ goAddListing, goChat, goMessages, goTrades }) => {
 
           </div>
 
-        </div>
+        </div>;
       </div>
     </div>
   );

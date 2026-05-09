@@ -58,7 +58,6 @@ const AdminDashboard = ({
     useState({
       users: 0,
       reports: 0,
-      messages: 0,
       suspended: 0,
       trades: 0,
       sold: 0,
@@ -138,14 +137,6 @@ const AdminDashboard = ({
           head: true,
         });
 
-    const { count: messages } =
-      await supabase
-        .from("messages")
-        .select("*", {
-          count: "exact",
-          head: true,
-        });
-
     const { count: suspended } =
       await supabase
         .from("users")
@@ -189,7 +180,6 @@ const AdminDashboard = ({
     setStats({
       users: users || 0,
       reports: reports || 0,
-      messages: messages || 0,
       suspended: suspended || 0,
       trades: trades || 0,
       sold: sold || 0,
@@ -201,7 +191,6 @@ const AdminDashboard = ({
       labels: [
         "Users",
         "Reports",
-        "Messages",
         "Trades",
         "Sold",
         "Blocked",
@@ -215,7 +204,6 @@ const AdminDashboard = ({
           data: [
             users || 0,
             reports || 0,
-            messages || 0,
             trades || 0,
             sold || 0,
             blockedUsers || 0,
@@ -224,7 +212,6 @@ const AdminDashboard = ({
           backgroundColor: [
             "#4CAF50",
             "#FF5252",
-            "#2196F3",
             "#FFC107",
             "#9C27B0",
             "#ff4d4d",
@@ -533,7 +520,6 @@ const AdminDashboard = ({
       body: [
         ["Users", stats.users],
         ["Reports", stats.reports],
-        ["Messages", stats.messages],
         ["Suspended", stats.suspended],
         ["Trades", stats.trades],
         ["Sold", stats.sold],
@@ -664,7 +650,7 @@ const AdminDashboard = ({
             )
           }
         >
-          🚫 Blocked Users
+          Blocked Users
         </p>
 
       </div>
@@ -727,11 +713,6 @@ const AdminDashboard = ({
               <div className="stat-card">
                 <h3>Reports</h3>
                 <p>{stats.reports}</p>
-              </div>
-
-              <div className="stat-card">
-                <h3>Messages</h3>
-                <p>{stats.messages}</p>
               </div>
 
               <div className="stat-card">
@@ -967,7 +948,7 @@ const AdminDashboard = ({
               >
 
                 <h3>
-                  🚫 Blocked User
+                  Blocked User
                 </h3>
 
                 <small>

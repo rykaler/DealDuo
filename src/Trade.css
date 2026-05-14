@@ -1,23 +1,103 @@
-.trade-page {
-  padding: 20px;
-  color: white;
+/* Trade.css */
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+/* PAGE */
+.trade-page {
+  min-height: 100vh;
+  background: #0A1B2A;
+  padding: 25px;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* HEADER */
+.trade-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.trade-header h2 {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* BACK BUTTON */
+.back-btn-trade {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: #d5ad36;
+  color: #0A1B2A;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  transform: scale(1.05);
+}
+
+/* EMPTY */
+.empty-text {
+  margin-top: 20px;
+  opacity: 0.7;
+  font-size: 15px;
+}
+
+/* CARD */
 .trade-card {
   background: #081521;
-  padding: 15px;
-  margin-top: 10px;
-  border-radius: 10px;
+  border: 1px solid #12293d;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.trade-card button {
-  margin-right: 5px;
-  margin-top: 5px;
-  padding: 8px;
-  border: none;
-  background: #d5ad36;
-  color: #0a1b2a;
-  cursor: pointer;
-  border-radius: 5px;
-  pointer-events: auto;
+.trade-card p {
+  margin: 10px 0;
+  line-height: 1.5;
 }
+
+/* ACTIONS */
+.trade-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* BUTTONS */
+.trade-card button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #d5ad36;
+  color: #0A1B2A;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.trade-card button:hover {
+  transform: scale(1.03);
+  opacity: 0.9;
+}
+
+/* COMPLETED */
+.completed {
+  margin-top: 15px;
+  color: #4ade80;
+  font-weight: bold;
+  font-size: 15px;
+} 

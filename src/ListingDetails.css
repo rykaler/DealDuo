@@ -1,0 +1,416 @@
+/* ListingDetails.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #081521;
+}
+
+/* PAGE */
+
+.details-page {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+
+  background: #081521;
+
+  overflow: hidden;
+}
+
+/* LEFT SIDE */
+
+.details-left {
+  flex: 1;
+
+  background: #081521;
+
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+}
+
+/* BACK BUTTON */
+
+.back-btn-listing {
+  position: absolute;
+
+  top: 20px;
+  left: 20px;
+
+  width: 60px;
+  height: 60px;
+
+  border-radius: 50%;
+
+  border: none;
+
+  background: white;
+
+  color: #081521;
+
+  font-size: 30px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  z-index: 20;
+
+  box-shadow:
+    0 5px 15px rgba(0,0,0,0.25);
+
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  transform: scale(1.05);
+}
+
+/* IMAGE */
+
+/* IMAGE */
+
+.image-container {
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* IMAGE ONLY */
+
+.main-image {
+  max-width: 100%;
+  max-height: 85vh;
+
+  object-fit: contain;
+
+  border-radius: 16px;
+
+  background: transparent;
+
+  box-shadow: none;
+} 
+
+/* SOLD / TRADED BADGE */
+
+.status-badge {
+  position: absolute;
+
+  bottom: 15px;
+  right: 15px;
+
+  background: rgba(0,0,0,0.75);
+
+  color: white;
+
+  padding: 8px 16px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: bold;
+
+  letter-spacing: 1px;
+}
+
+/* RIGHT SIDE */
+
+.details-right {
+  width: 420px;
+
+  background: #0A1B2A;
+
+  overflow-y: auto;
+
+  border-left:
+    1px solid rgba(255,255,255,0.06);
+}
+
+/* INFO CARD */
+
+.info-card {
+  padding: 28px;
+}
+
+/* TITLE */
+
+.info-card h1 {
+  font-size: 42px;
+  font-weight: 800;
+
+  color: white;
+
+  line-height: 1.1;
+}
+
+/* PRICE */
+
+.info-card h2 {
+  margin-top: 10px;
+
+  font-size: 34px;
+
+  color: #D5AD36;
+}
+
+/* POSTED */
+
+.posted {
+  margin-top: 10px;
+
+  color: #cbd5e1;
+
+  font-size: 14px;
+}
+
+/* SELLER */
+
+.seller-name {
+  margin-top: 8px;
+
+  font-size: 15px;
+
+  color: white;
+
+  font-weight: 600;
+}
+
+/* ACTION BUTTONS */
+
+.action-buttons {
+  margin-top: 22px;
+}
+
+.message-btn {
+  width: 100%;
+
+  border: none;
+
+  background: #D5AD36;
+
+  padding: 15px;
+
+  border-radius: 14px;
+
+  font-size: 18px;
+  font-weight: 700;
+
+  color: #081521;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.message-btn:hover {
+  opacity: 0.9;
+}
+
+/* OWNER BUTTONS */
+
+.owner-buttons {
+  margin-top: 22px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.owner-btn {
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #D5AD36;
+
+  color: #081521;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.owner-btn:hover {
+  opacity: 0.9;
+}
+
+.delete-btn {
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #dc2626;
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 0.9;
+}
+
+/* DETAILS */
+
+.details-section {
+  margin-top: 38px;
+}
+
+.details-section h3 {
+  font-size: 25px;
+
+  margin-bottom: 18px;
+
+  color: white;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 15px;
+
+  font-size: 16px;
+
+  color: #e2e8f0;
+}
+
+/* DESCRIPTION */
+
+.description-box {
+  margin-top: 38px;
+}
+
+.description-box h3 {
+  font-size: 25px;
+
+  margin-bottom: 15px;
+
+  color: white;
+}
+
+.description-box p {
+  color: #cbd5e1;
+
+  font-size: 15px;
+
+  line-height: 1.7;
+}
+
+/* MESSAGE BOX */
+
+.seller-box {
+  margin-top: 38px;
+}
+
+.seller-box p {
+  margin-bottom: 12px;
+
+  font-size: 18px;
+
+  font-weight: 700;
+
+  color: white;
+}
+
+/* TEXTAREA */
+
+.seller-box textarea {
+  width: 100%;
+  height: 120px;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  background: #081521;
+
+  color: white;
+
+  padding: 15px;
+
+  font-size: 15px;
+
+  resize: none;
+
+  outline: none;
+}
+
+.seller-box textarea:focus {
+  border-color: #D5AD36;
+}
+
+/* SEND BUTTON */
+
+.send-btn {
+  width: 100%;
+
+  margin-top: 15px;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.send-btn:hover {
+  opacity: 0.9;
+}
+
+/* LOADING */
+
+.loading {
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #081521;
+
+  color: white;
+
+  font-size: 28px;
+  font-weight: bold;
+}

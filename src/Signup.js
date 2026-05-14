@@ -15,6 +15,9 @@ const Signup = ({ goBack }) => {
   const [password, setPassword] =
     useState("");
 
+  const [showPassword, setShowPassword] =
+    useState(false);
+
   const handleSignup = async () => {
 
     if (!fullName || !email || !password) {
@@ -63,7 +66,6 @@ const Signup = ({ goBack }) => {
 
       <div className="signup-card">
 
-        {/* BACK BUTTON */}
         <button
           className="signup-back-btn"
           onClick={goBack}
@@ -71,14 +73,12 @@ const Signup = ({ goBack }) => {
           ← Back
         </button>
 
-        {/* TITLE */}
         <h2>JOIN THE HUB</h2>
 
         <p className="subtitle">
           Create your marketplace account
         </p>
 
-        {/* FULL NAME */}
         <label>Full Name</label>
 
         <input
@@ -90,7 +90,6 @@ const Signup = ({ goBack }) => {
           }
         />
 
-        {/* EMAIL */}
         <label>Email</label>
 
         <input
@@ -102,19 +101,31 @@ const Signup = ({ goBack }) => {
           }
         />
 
-        {/* PASSWORD */}
         <label>Password</label>
 
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-        />
+        <div className="password-container">
 
-        {/* SIGNUP BUTTON */}
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+          />
+
+          <button
+            type="button"
+            className="show-btn"
+            onClick={() =>
+              setShowPassword(!showPassword)
+            }
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+
+        </div>
+
         <button
           className="signup-btn"
           onClick={handleSignup}

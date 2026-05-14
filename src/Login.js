@@ -6,10 +6,14 @@ import "./Login.css";
 
 const Login = ({ goBack, onSuccess }) => {
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] =
+    useState("");
 
   const [password, setPassword] =
     useState("");
+
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   const [loading, setLoading] =
     useState(false);
@@ -57,7 +61,7 @@ const Login = ({ goBack, onSuccess }) => {
 
     if (userData?.is_suspended) {
 
-      alert("🚫 Your account is suspended.");
+      alert("Your account is suspended.");
 
       await supabase.auth.signOut();
 
@@ -77,6 +81,39 @@ const Login = ({ goBack, onSuccess }) => {
         : "user"
     );
   };
+
+  const handleForgotPassword =
+    async () => {
+
+      if (!email) {
+
+        alert(
+          "Please enter your email first."
+        );
+
+        return;
+      }
+
+      const { error } =
+        await supabase.auth.resetPasswordForEmail(
+          email,
+          {
+            redirectTo:
+              "https://deal-duo.vercel.app/reset-password",
+          }
+        );
+
+      if (error) {
+
+        alert(error.message);
+
+        return;
+      }
+
+      alert(
+        "Password reset link sent to your email."
+      );
+    };
 
   return (
     <div className="login-page">
@@ -104,7 +141,7 @@ const Login = ({ goBack, onSuccess }) => {
 
         <input
           type="email"
-          placeholder="student@university.edu"
+          placeholder="student@gmail.com"
           value={email}
           onChange={(e) =>
             setEmail(e.target.value)
@@ -114,14 +151,45 @@ const Login = ({ goBack, onSuccess }) => {
         {/* PASSWORD */}
         <label>Password</label>
 
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) =>
-            setPassword(e.target.value)
-          }
-        />
+        <div className="password-container">
+
+          <input
+            type={
+              showPassword
+                ? "text"
+                : "password"
+            }
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+          />
+
+          <button
+            type="button"
+            className="show-btn"
+            onClick={() =>
+              setShowPassword(
+                !showPassword
+              )
+            }
+          >
+            {showPassword
+              ? "Hide"
+              : "Show"}
+          </button>
+
+        </div>
+
+        {/* FORGOT PASSWORD */}
+        <button
+  type="button"
+  className="forgot-password"
+  onClick={handleForgotPassword}
+>
+  Forgot Password?
+</button>
 
         {/* LOGIN BUTTON */}
         <button

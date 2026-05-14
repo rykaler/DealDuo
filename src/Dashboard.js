@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import "./Dashboard.css";
 import EditListing from "./EditListing";
+import ListingDetails from "./ListingDetails";
 
 const Dashboard = ({
   goAddListing,
@@ -11,200 +12,123 @@ const Dashboard = ({
   goProfile
 }) => {
 
-  const [listings, setListings] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [user, setUser] = useState(null);
+  const [listings, setListings] =
+    useState([]);
 
-  const [showMenu, setShowMenu] = useState(false);
+  const [filtered, setFiltered] =
+    useState([]);
 
-  const [category, setCategory] = useState("");
-  const [priceRange, setPriceRange] = useState("");
-  const [status, setStatus] = useState("");
+  const [user, setUser] =
+    useState(null);
 
-  // EDIT
-  const [editItem, setEditItem] = useState(null);
+  const [showMenu, setShowMenu] =
+    useState(false);
 
-  // TRADE
-  const [tradeItem, setTradeItem] = useState(null);
-  const [myItems, setMyItems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState("");
+  const [showFilters, setShowFilters] =
+    useState(false);
 
-  // =========================
-  // INIT
-  // =========================
+  const [category, setCategory] =
+    useState("");
+
+  const [priceRange, setPriceRange] =
+    useState("");
+
+  const [status, setStatus] =
+    useState("");
+
+  const [editItem, setEditItem] =
+    useState(null);
+
+  const [selectedListing, setSelectedListing] =
+    useState(null);
+
   useEffect(() => {
     init();
   }, []);
 
   const init = async () => {
 
-    const { data } = await supabase.auth.getUser();
+    const { data } =
+      await supabase.auth.getUser();
 
     setUser(data.user);
 
     fetchListings();
-
-    if (data.user) {
-      fetchMyItems(data.user.id);
-    }
   };
 
-  // =========================
-  // FETCH LISTINGS
-  // =========================
   const fetchListings = async () => {
 
-    const { data } = await supabase
-      .from("listings")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
     setListings(data || []);
   };
 
-  // =========================
-  // FETCH MY ITEMS
-  // =========================
-  const fetchMyItems = async (userId) => {
-
-    const { data } = await supabase
-      .from("listings")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("is_sold", false)
-      .eq("is_traded", false);
-
-    setMyItems(data || []);
-  };
-
-  // =========================
-  // FILTERS
-  // =========================
   useEffect(() => {
 
     let temp = [...listings];
 
     if (category) {
-      temp = temp.filter((i) => i.category === category);
+      temp = temp.filter(
+        (i) =>
+          i.category === category
+      );
     }
 
     if (priceRange === "low") {
-      temp = temp.filter((i) => i.price <= 500);
+      temp = temp.filter(
+        (i) => i.price <= 500
+      );
     }
 
     if (priceRange === "mid") {
       temp = temp.filter(
-        (i) => i.price > 500 && i.price <= 2000
+        (i) =>
+          i.price > 500 &&
+          i.price <= 2000
       );
     }
 
     if (priceRange === "high") {
-      temp = temp.filter((i) => i.price > 2000);
+      temp = temp.filter(
+        (i) => i.price > 2000
+      );
     }
 
     if (status === "available") {
       temp = temp.filter(
-        (i) => !i.is_sold && !i.is_traded
+        (i) =>
+          !i.is_sold &&
+          !i.is_traded
       );
     }
 
     if (status === "sold") {
-      temp = temp.filter((i) => i.is_sold);
+      temp = temp.filter(
+        (i) => i.is_sold
+      );
     }
 
     if (status === "traded") {
-      temp = temp.filter((i) => i.is_traded);
+      temp = temp.filter(
+        (i) => i.is_traded
+      );
     }
 
     setFiltered(temp);
 
-  }, [listings, category, priceRange, status]);
+  }, [
+    listings,
+    category,
+    priceRange,
+    status,
+  ]);
 
-  // =========================
-  // MARK SOLD
-  // =========================
-  const markAsSold = async (id) => {
-
-    await supabase
-      .from("listings")
-      .update({ is_sold: true })
-      .eq("id", id);
-
-    fetchListings();
-  };
-
-  // =========================
-  // MARK TRADED
-  // =========================
-  const markAsTraded = async (id) => {
-
-    await supabase
-      .from("listings")
-      .update({ is_traded: true })
-      .eq("id", id);
-
-    fetchListings();
-  };
-
-  // =========================
-  // DELETE
-  // =========================
-  const handleDelete = async (id) => {
-
-    await supabase
-      .from("listings")
-      .delete()
-      .eq("id", id);
-
-    fetchListings();
-  };
-
-  // =========================
-  // OPEN TRADE
-  // =========================
-  const handleTrade = (item) => {
-
-    setTradeItem(item);
-
-    if (user) {
-      fetchMyItems(user.id);
-    }
-  };
-
-  // =========================
-  // SEND TRADE
-  // =========================
-  const sendTrade = async () => {
-
-    if (!selectedItem) {
-      return alert("Select your item!");
-    }
-
-    const payload = {
-      sender_id: user.id,
-      receiver_id: tradeItem.user_id,
-      sender_item: selectedItem,
-      receiver_item: tradeItem.id,
-      status: "pending",
-    };
-
-    const { error } = await supabase
-      .from("trades")
-      .insert([payload]);
-
-    if (error) {
-      return alert(error.message);
-    }
-
-    alert("Trade sent!");
-
-    setTradeItem(null);
-    setSelectedItem("");
-  };
-
-  // =========================
-  // LOGOUT
-  // =========================
   const handleLogout = async () => {
 
     await supabase.auth.signOut();
@@ -212,70 +136,29 @@ const Dashboard = ({
     window.location.href = "/";
   };
 
+  // OPEN LISTING DETAILS
+  if (selectedListing) {
+    return (
+      <ListingDetails
+        listingId={selectedListing}
+        goBack={() =>
+          setSelectedListing(null)
+        }
+        goChat={goChat}
+      />
+    );
+  }
+
   const displayItems =
-    category || priceRange || status
+    category ||
+    priceRange ||
+    status
       ? filtered
       : listings;
 
   return (
     <div className="dashboard">
 
-      {/* =========================
-          TRADE MODAL
-      ========================= */}
-      {tradeItem && (
-        <div className="modal">
-
-          <div className="modal-content">
-
-            <h2>Trade Offer</h2>
-
-            <select
-              value={selectedItem}
-              onChange={(e) =>
-                setSelectedItem(e.target.value)
-              }
-            >
-
-              <option value="">
-                Select your item
-              </option>
-
-              {myItems.map((i) => (
-                <option
-                  key={i.id}
-                  value={i.id}
-                >
-                  {i.title}
-                </option>
-              ))}
-
-            </select>
-
-            <div className="modal-actions">
-
-              <button onClick={sendTrade}>
-                Send
-              </button>
-
-              <button
-                onClick={() =>
-                  setTradeItem(null)
-                }
-              >
-                Cancel
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* =========================
-          EDIT MODAL
-      ========================= */}
       {editItem && (
         <EditListing
           id={editItem}
@@ -333,6 +216,159 @@ const Dashboard = ({
               + Add Listing
             </button>
 
+            {/* FILTER */}
+            <div className="filter-wrapper">
+
+              <button
+                className="filter-toggle"
+                onClick={() =>
+                  setShowFilters(
+                    !showFilters
+                  )
+                }
+              >
+                ☰ Filters
+              </button>
+
+              {showFilters && (
+                <div className="filter-dropdown">
+
+                  {/* CATEGORY */}
+                  <div className="filter-group">
+
+                    <p>Category</p>
+
+                    <button
+                      onClick={() =>
+                        setCategory("Books")
+                      }
+                    >
+                      Books
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setCategory(
+                          "Uniforms"
+                        )
+                      }
+                    >
+                      Uniforms
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setCategory(
+                          "Electronics"
+                        )
+                      }
+                    >
+                      Electronics
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setCategory("")
+                      }
+                    >
+                      Clear
+                    </button>
+
+                  </div>
+
+                  {/* PRICE */}
+                  <div className="filter-group">
+
+                    <p>Price</p>
+
+                    <button
+                      onClick={() =>
+                        setPriceRange(
+                          "low"
+                        )
+                      }
+                    >
+                      ₱0-500
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setPriceRange(
+                          "mid"
+                        )
+                      }
+                    >
+                      ₱500-2000
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setPriceRange(
+                          "high"
+                        )
+                      }
+                    >
+                      ₱2000+
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setPriceRange("")
+                      }
+                    >
+                      Clear
+                    </button>
+
+                  </div>
+
+                  {/* STATUS */}
+                  <div className="filter-group">
+
+                    <p>Status</p>
+
+                    <button
+                      onClick={() =>
+                        setStatus(
+                          "available"
+                        )
+                      }
+                    >
+                      Available
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setStatus("sold")
+                      }
+                    >
+                      Sold
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setStatus(
+                          "traded"
+                        )
+                      }
+                    >
+                      Traded
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setStatus("")
+                      }
+                    >
+                      Clear
+                    </button>
+
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+
             {/* AVATAR */}
             <div
               className="avatar"
@@ -340,10 +376,10 @@ const Dashboard = ({
                 setShowMenu(!showMenu)
               }
             >
-              {user?.email?.[0]?.toUpperCase() || "U"}
+              {user?.email?.[0]?.toUpperCase() ||
+                "U"}
             </div>
 
-            {/* DROPDOWN */}
             {showMenu && (
               <div className="dropdown">
 
@@ -351,7 +387,9 @@ const Dashboard = ({
                   My Profile
                 </p>
 
-                <p onClick={handleLogout}>
+                <p
+                  onClick={handleLogout}
+                >
                   Logout
                 </p>
 
@@ -367,242 +405,80 @@ const Dashboard = ({
           Marketplace
         </h1>
 
-        <div className="content">
+        {/* PRODUCTS */}
+        <div className="products">
 
-          {/* FILTERS */}
-          <div className="filters">
+          {displayItems.map((item) => (
 
-            <h3>Filters</h3>
+            <div
+              className={`product-card ${
+                item.is_sold
+                  ? "sold-card"
+                  : item.is_traded
+                  ? "traded-card"
+                  : ""
+              }`}
+              key={item.id}
 
-            {/* CATEGORY */}
-            <div className="filter-group">
+              onClick={() =>
+                setSelectedListing(
+                  item.id
+                )
+              }
+            >
 
-              <p>Category</p>
-
-              <button
-                onClick={() =>
-                  setCategory("books")
-                }
-              >
-                Books
-              </button>
-
-              <button
-                onClick={() =>
-                  setCategory("uniform")
-                }
-              >
-                Uniform
-              </button>
-
-              <button
-                onClick={() =>
-                  setCategory("electronics")
-                }
-              >
-                Gadgets
-              </button>
-
-              <button
-                onClick={() =>
-                  setCategory("")
-                }
-              >
-                Clear
-              </button>
-
-            </div>
-
-            {/* PRICE */}
-            <div className="filter-group">
-
-              <p>Price</p>
-
-              <button
-                onClick={() =>
-                  setPriceRange("low")
-                }
-              >
-                ₱0-500
-              </button>
-
-              <button
-                onClick={() =>
-                  setPriceRange("mid")
-                }
-              >
-                ₱500-2000
-              </button>
-
-              <button
-                onClick={() =>
-                  setPriceRange("high")
-                }
-              >
-                ₱2000+
-              </button>
-
-              <button
-                onClick={() =>
-                  setPriceRange("")
-                }
-              >
-                Clear
-              </button>
-
-            </div>
-
-            {/* STATUS */}
-            <div className="filter-group">
-
-              <p>Status</p>
-
-              <button
-                onClick={() =>
-                  setStatus("available")
-                }
-              >
-                Available
-              </button>
-
-              <button
-                onClick={() =>
-                  setStatus("sold")
-                }
-              >
-                Sold
-              </button>
-
-              <button
-                onClick={() =>
-                  setStatus("traded")
-                }
-              >
-                Traded
-              </button>
-
-              <button
-                onClick={() =>
-                  setStatus("")
-                }
-              >
-                Clear
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* PRODUCTS */}
-          <div className="products">
-
-            {displayItems.map((item) => (
-
-              <div
-                className="product-card"
-                key={item.id}
-              >
-
-                {/* BADGES */}
-                {item.is_sold && (
-                  <div className="sold-badge">
-                    SOLD
-                  </div>
-                )}
-
-                {item.is_traded && (
-                  <div className="sold-badge">
-                    TRADED
-                  </div>
-                )}
+              {/* IMAGE */}
+              <div className="image-wrapper">
 
                 <img
                   src={item.image_url}
                   alt=""
                 />
 
-                <h4>{item.title}</h4>
+                {item.is_sold && (
+                  <div className="image-overlay">
+                    SOLD
+                  </div>
+                )}
+
+                {item.is_traded && (
+                  <div className="image-overlay">
+                    TRADED
+                  </div>
+                )}
+
+              </div>
+
+              {/* INFO */}
+              <div className="product-info">
+
+                <h4>
+                  {item.title}
+                </h4>
 
                 <p className="price">
                   ₱{item.price}
                 </p>
 
-                <div className="product-actions">
+                <p className="posted-by">
+                  Posted by{" "}
+                  {item.email ||
+                    "User"}
+                </p>
 
-                  {/* OWNER */}
-                  {user?.id === item.user_id ? (
-                    <>
+                <p className="posted-time">
 
-                      <button
-                        onClick={() =>
-                          setEditItem(item.id)
-                        }
-                      >
-                        Edit
-                      </button>
+                  {new Date(
+                    item.created_at
+                  ).toLocaleDateString()}
 
-                      {!item.is_sold &&
-                        !item.is_traded && (
-                          <>
-                            <button
-                              onClick={() =>
-                                markAsSold(item.id)
-                              }
-                            >
-                              Mark as Sold
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                markAsTraded(item.id)
-                              }
-                            >
-                              Mark Trade Complete
-                            </button>
-                          </>
-                        )}
-
-                      <button
-                        onClick={() =>
-                          handleDelete(item.id)
-                        }
-                      >
-                        Delete
-                      </button>
-
-                    </>
-                  ) : (
-                    <>
-                      {!item.is_sold &&
-                        !item.is_traded && (
-                          <>
-                            <button
-                              onClick={() =>
-                                goChat(item.user_id)
-                              }
-                            >
-                              Message
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                handleTrade(item)
-                              }
-                            >
-                              Trade
-                            </button>
-                          </>
-                        )}
-                    </>
-                  )}
-
-                </div>
+                </p>
 
               </div>
 
-            ))}
+            </div>
 
-          </div>
+          ))}
 
         </div>
 

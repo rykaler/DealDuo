@@ -1,7 +1,10 @@
+// =========================
+// CHAT.JS
+// =========================
+
 import React, {
   useEffect,
   useState,
-  useRef
 } from "react";
 
 import { supabase }
@@ -11,10 +14,13 @@ import "./Chat.css";
 
 const Chat = ({
   receiverId,
-  goBack
+  goBack,
 }) => {
 
   const [user, setUser] =
+    useState(null);
+
+  const [receiver, setReceiver] =
     useState(null);
 
   const [messages, setMessages] =
@@ -23,137 +29,161 @@ const Chat = ({
   const [text, setText] =
     useState("");
 
-  const bottomRef = useRef(null);
+  const [toast, setToast] =
+    useState("");
+
+  const [menuOpen, setMenuOpen] =
+    useState(false);
+
+  const [severity, setSeverity] =
+    useState("low");
+
+  const [isBlocked, setIsBlocked] =
+    useState(false);
 
   useEffect(() => {
     getUser();
   }, []);
 
-  useEffect(() => {
-
-    if (user) {
-
-      fetchMessages();
-
-      // REALTIME
-      const channel =
-        supabase
-          .channel("chat-room")
-
-          .on(
-            "postgres_changes",
-            {
-              event: "INSERT",
-              schema: "public",
-              table: "messages",
-            },
-
-            (payload) => {
-
-              const msg =
-                payload.new;
-
-              const isMine =
-                msg.sender_id === user.id &&
-                msg.receiver_id === receiverId;
-
-              const isTheirs =
-                msg.sender_id === receiverId &&
-                msg.receiver_id === user.id;
-
-              if (
-                isMine ||
-                isTheirs
-              ) {
-
-                setMessages(
-                  (prev) => [
-                    ...prev,
-                    msg
-                  ]
-                );
-              }
-            }
-          )
-
-          .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-
-  }, [user]);
-
-  useEffect(() => {
-
-    bottomRef.current?.
-      scrollIntoView({
-        behavior: "smooth"
-      });
-
-  }, [messages]);
-
-  // GET USER
   const getUser = async () => {
 
     const { data } =
       await supabase.auth.getUser();
 
     setUser(data.user);
+
+    if (data.user) {
+
+      const { data: receiverData } =
+        await supabase
+          .from("users")
+          .select("name,email")
+          .eq("id", receiverId)
+          .single();
+
+      setReceiver(receiverData);
+
+      checkBlocked(
+        data.user.id
+      );
+    }
   };
 
-  // FETCH MESSAGES
+  const checkBlocked =
+    async (myId) => {
+
+    const { data } =
+      await supabase
+        .from("blocked_users")
+        .select("*")
+        .or(
+          `and(blocker_id.eq.${myId},blocked_id.eq.${receiverId}),and(blocker_id.eq.${receiverId},blocked_id.eq.${myId})`
+        );
+
+    setIsBlocked(
+      data?.length > 0
+    );
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchMessages();
+    }
+  }, [user]);
+
   const fetchMessages =
     async () => {
 
-      const { data, error } =
-        await supabase
-          .from("messages")
-          .select("*")
-          .or(
-            `and(sender_id.eq.${receiverId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${receiverId})`
-          )
-          .order("created_at", {
-            ascending: true,
-          });
+    const { data } =
+      await supabase
+        .from("messages")
+        .select("*")
+        .or(
+          `and(sender_id.eq.${user.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${user.id})`
+        )
+        .order("created_at", {
+          ascending: true,
+        });
 
-      if (error) {
-        console.log(error);
-        return;
-      }
+    setMessages(data || []);
+  };
 
-      setMessages(data || []);
-    };
-
-  // SEND MESSAGE
   const sendMessage =
     async () => {
 
-      if (!text.trim()) return;
+    if (isBlocked) {
+      return showToast(
+        "🚫 Chat blocked"
+      );
+    }
 
-      const { error } =
-        await supabase
-          .from("messages")
-          .insert([
-            {
-              sender_id:
-                user.id,
+    if (!text.trim()) return;
 
-              receiver_id:
-                receiverId,
+    await supabase
+      .from("messages")
+      .insert({
+        sender_id: user.id,
+        receiver_id: receiverId,
+        text,
+      });
 
-              text: text,
-            },
-          ]);
+    setText("");
 
-      if (error) {
-        console.log(error);
-        return;
-      }
+    fetchMessages();
+  };
 
-      setText("");
-    };
+  const reportUser =
+    async () => {
+
+    await supabase
+      .from("reports")
+      .insert({
+        reporter_id: user.id,
+        reported_user_id:
+          receiverId,
+        severity,
+        reason:
+          severity === "high"
+            ? "Harassment / Scam"
+            : severity === "medium"
+            ? "Misleading"
+            : "Spam",
+      });
+
+    showToast(
+      "⚠ Report submitted"
+    );
+
+    setMenuOpen(false);
+  };
+
+  const blockUser =
+    async () => {
+
+    await supabase
+      .from("blocked_users")
+      .insert({
+        blocker_id: user.id,
+        blocked_id: receiverId,
+      });
+
+    setIsBlocked(true);
+
+    showToast(
+      "🚫 User blocked"
+    );
+
+    setMenuOpen(false);
+  };
+
+  const showToast = (msg) => {
+
+    setToast(msg);
+
+    setTimeout(() => {
+      setToast("");
+    }, 3000);
+  };
 
   return (
     <div className="chat-page">
@@ -161,18 +191,117 @@ const Chat = ({
       {/* HEADER */}
       <div className="chat-header">
 
-        <button
-          onClick={goBack}
-        >
-          ←
-        </button>
+        <div className="header-left">
 
-        <h2>Chat</h2>
+          <button
+            onClick={goBack}
+          >
+            ←
+          </button>
+
+          <h3>
+            {receiver?.name ||
+              receiver?.email?.split("@")[0] ||
+              "Conversation"}
+          </h3>
+
+        </div>
+
+        {/* REPORT */}
+        <div className="report-wrap">
+
+          <button
+            className="report-btn"
+            onClick={() =>
+              setMenuOpen(
+                !menuOpen
+              )
+            }
+          >
+            Report
+          </button>
+
+          {menuOpen && (
+
+            <div className="report-menu">
+
+              <div className="severity-wrap">
+
+                <label>
+                  Severity
+                </label>
+
+                <select
+                  value={
+                    severity
+                  }
+                  onChange={(e) =>
+                    setSeverity(
+                      e.target.value
+                    )
+                  }
+                >
+                  <option value="low">
+                    Spam
+                  </option>
+
+                  <option value="medium">
+                    Misleading
+                  </option>
+
+                  <option value="high">
+                    Scam /
+                    Harassment
+                  </option>
+
+                </select>
+
+              </div>
+
+              <button
+                onClick={
+                  reportUser
+                }
+              >
+                ⚠ Report User
+              </button>
+
+              <button
+                onClick={
+                  blockUser
+                }
+              >
+                🚫 Block User
+              </button>
+
+            </div>
+          )}
+
+        </div>
 
       </div>
 
-      {/* BODY */}
-      <div className="chat-body">
+      {/* BLOCKED */}
+      {isBlocked && (
+
+        <div className="block-banner">
+          🚫 One of you blocked
+          this conversation
+        </div>
+
+      )}
+
+      {/* CHAT */}
+      <div className="chat-box">
+
+        {messages.length ===
+          0 && (
+
+          <div className="no-msg">
+            No messages yet
+          </div>
+
+        )}
 
         {messages.map((msg) => (
 
@@ -181,18 +310,14 @@ const Chat = ({
             className={
               msg.sender_id ===
               user?.id
-                ? "my-message"
-                : "their-message"
+                ? "my-msg"
+                : "their-msg"
             }
           >
-
             {msg.text}
-
           </div>
 
         ))}
-
-        <div ref={bottomRef}></div>
 
       </div>
 
@@ -200,21 +325,41 @@ const Chat = ({
       <div className="chat-input">
 
         <input
-          type="text"
-          placeholder="Type message..."
           value={text}
+          disabled={
+            isBlocked
+          }
           onChange={(e) =>
-            setText(e.target.value)
+            setText(
+              e.target.value
+            )
+          }
+          placeholder={
+            isBlocked
+              ? "Messaging disabled"
+              : "Type message..."
           }
         />
 
         <button
-          onClick={sendMessage}
+          onClick={
+            sendMessage
+          }
+          disabled={
+            isBlocked
+          }
         >
           Send
         </button>
 
       </div>
+
+      {/* TOAST */}
+      {toast && (
+        <div className="toast">
+          {toast}
+        </div>
+      )}
 
     </div>
   );

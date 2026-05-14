@@ -6,21 +6,47 @@ const Messages = ({ goBack, openChat }) => {
 
   const [user, setUser] = useState(null);
 
-  const [conversations, setConversations] = useState([]);
+  const [conversations, setConversations] =
+    useState([]);
 
-  const [toast, setToast] = useState("");
+  const [toast, setToast] =
+    useState("");
 
   useEffect(() => {
     getUser();
   }, []);
 
   useEffect(() => {
+
     if (user) {
+
       fetchMessages();
+
+      // REALTIME
+      const channel =
+        supabase
+          .channel("messages-realtime")
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "messages",
+            },
+            () => {
+              fetchMessages();
+            }
+          )
+          .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
+
   }, [user]);
 
-  /* GET CURRENT USER */
+  /* GET USER */
   const getUser = async () => {
 
     const { data } =
@@ -29,10 +55,10 @@ const Messages = ({ goBack, openChat }) => {
     setUser(data.user);
   };
 
-  /* FETCH MESSAGES + USER NAMES */
+  /* FETCH CONVERSATIONS */
   const fetchMessages = async () => {
 
-    const { data: messages } =
+    const { data: messages, error } =
       await supabase
         .from("messages")
         .select("*")
@@ -40,11 +66,22 @@ const Messages = ({ goBack, openChat }) => {
           ascending: false,
         });
 
-    if (!messages) return;
+    if (error || !messages) {
+      console.log(error);
+      return;
+    }
 
     const unique = {};
 
     for (const msg of messages) {
+
+      // ONLY USER'S MESSAGES
+      if (
+        msg.sender_id !== user.id &&
+        msg.receiver_id !== user.id
+      ) {
+        continue;
+      }
 
       const otherUserId =
         msg.sender_id === user.id
@@ -53,19 +90,21 @@ const Messages = ({ goBack, openChat }) => {
 
       if (!unique[otherUserId]) {
 
-        /* GET USER NAME */
-        const { data: userInfo } =
-          await supabase
-            .from("users")
-            .select("name")
-            .eq("id", otherUserId)
-            .single();
+        // GET USER NAME
+        const {
+          data: userInfo
+        } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", otherUserId)
+          .single();
 
         unique[otherUserId] = {
           ...msg,
           otherUserId,
           otherUserName:
-            userInfo?.name || "Unknown User",
+            userInfo?.name ||
+            "Unknown User",
         };
       }
     }
@@ -88,6 +127,7 @@ const Messages = ({ goBack, openChat }) => {
   return (
     <div className="messages-page">
 
+      {/* SIDEBAR */}
       <div className="messages-sidebar">
 
         {/* HEADER */}
@@ -101,12 +141,18 @@ const Messages = ({ goBack, openChat }) => {
 
         </div>
 
-        {/* CONVERSATIONS */}
+        {/* LIST */}
         <div className="messages-list">
 
-          {conversations.map((msg) => {
+          {conversations.length === 0 ? (
 
-            return (
+            <div className="empty-msg">
+              No conversations yet
+            </div>
+
+          ) : (
+
+            conversations.map((msg) => (
 
               <div
                 key={msg.id}
@@ -116,7 +162,9 @@ const Messages = ({ goBack, openChat }) => {
                 <div
                   className="message-left"
                   onClick={() =>
-                    openChat(msg.otherUserId)
+                    openChat(
+                      msg.otherUserId
+                    )
                   }
                 >
 
@@ -145,8 +193,10 @@ const Messages = ({ goBack, openChat }) => {
                 </div>
 
               </div>
-            );
-          })}
+
+            ))
+
+          )}
 
         </div>
 

@@ -337,7 +337,7 @@ const Chat = ({
     // AUTO SUSPEND
     if (
       reportCount &&
-      reportCount.length >= 3
+      reportCount.length >= 5
     ) {
 
       await supabase

@@ -1,11 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+// =========================
+// ListingDetails.js
+// =========================
+
+import React, {
+  useEffect,
+  useState
+} from "react";
+
+import { supabase }
+from "./supabaseClient";
+
 import "./ListingDetails.css";
 
 const ListingDetails = ({
   listingId,
   goBack,
-  goChat
+  goChat,
+  goSellerProfile
 }) => {
 
   const [item, setItem] =
@@ -215,6 +226,22 @@ const ListingDetails = ({
             Seller:{" "}
             {item.email || "User"}
           </p>
+
+          {/* VIEW PROFILE BUTTON */}
+          {user?.id !== item.user_id && (
+
+            <button
+              className="view-profile-btn"
+              onClick={() =>
+                goSellerProfile(
+                  item.user_id
+                )
+              }
+            >
+              View Profile
+            </button>
+
+          )}
 
           {/* OWNER BUTTONS */}
           {user?.id === item.user_id ? (

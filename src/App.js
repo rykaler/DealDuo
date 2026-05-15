@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { supabase } from "./supabaseClient";
+// =========================
+// App.js
+// =========================
+
+import React, {
+  useState,
+  useEffect
+} from "react";
+
+import { supabase }
+from "./supabaseClient";
 
 import LandingPage from "./LandingPage";
 import Signup from "./Signup";
@@ -10,23 +19,26 @@ import Chat from "./Chat";
 import Messages from "./Messages";
 import AdminDashboard from "./AdminDashboard";
 import TradeRequests from "./TradeRequest";
-
-// ✅ IMPORT PROFILE PAGE
 import Profile from "./Profile";
+import SellerProfile from "./SellerProfile";
 
 function App() {
 
-  const [page, setPage] = useState("landing");
+  const [page, setPage] =
+    useState("landing");
 
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] =
+    useState(null);
 
-  const [role, setRole] = useState(null);
+  const [selectedSeller, setSelectedSeller] =
+    useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const [role, setRole] =
+    useState(null);
 
-  // =========================
-  // SESSION CHECK
-  // =========================
+  const [loading, setLoading] =
+    useState(true);
+
   useEffect(() => {
     checkSession();
   }, []);
@@ -39,7 +51,6 @@ function App() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // NO SESSION
       if (!user) {
 
         setPage("landing");
@@ -49,14 +60,15 @@ function App() {
         return;
       }
 
-      // GET USER ROLE
-      const { data, error } = await supabase
-        .from("users")
-        .select("role, is_suspended")
-        .eq("id", user.id)
-        .single();
+      const { data, error } =
+        await supabase
+          .from("users")
+          .select(
+            "role, is_suspended"
+          )
+          .eq("id", user.id)
+          .single();
 
-      // INVALID USER
       if (error || !data) {
 
         await supabase.auth.signOut();
@@ -68,10 +80,11 @@ function App() {
         return;
       }
 
-      // SUSPENDED
       if (data.is_suspended) {
 
-        alert("🚫 Your account is suspended.");
+        alert(
+          "🚫 Your account is suspended."
+        );
 
         await supabase.auth.signOut();
 
@@ -82,7 +95,6 @@ function App() {
         return;
       }
 
-      // SUCCESS
       setRole(data.role);
 
       setPage(
@@ -103,9 +115,7 @@ function App() {
     }
   };
 
-  // =========================
   // OPEN CHAT
-  // =========================
   const openChat = (userId) => {
 
     setSelectedUser(userId);
@@ -113,17 +123,21 @@ function App() {
     setPage("chat");
   };
 
-  // =========================
-  // OPEN TRADE REQUESTS
-  // =========================
+  // OPEN SELLER PROFILE
+  const openSellerProfile =
+    (sellerId) => {
+
+    setSelectedSeller(sellerId);
+
+    setPage("sellerProfile");
+  };
+
+  // OPEN TRADES
   const openTrades = () => {
 
     setPage("trades");
   };
 
-  // =========================
-  // LOADING
-  // =========================
   if (loading) {
 
     return (
@@ -142,22 +156,25 @@ function App() {
   return (
     <>
 
-      {/* =========================
-          LANDING
-      ========================= */}
+      {/* LANDING */}
       {page === "landing" && (
         <LandingPage
-          goLogin={() => setPage("login")}
-          goSignup={() => setPage("signup")}
+          goLogin={() =>
+            setPage("login")
+          }
+          goSignup={() =>
+            setPage("signup")
+          }
         />
       )}
 
-      {/* =========================
-          LOGIN
-      ========================= */}
+      {/* LOGIN */}
       {page === "login" && (
         <Login
-          goBack={() => setPage("landing")}
+          goBack={() =>
+            setPage("landing")
+          }
+
           onSuccess={(userRole) => {
 
             setRole(userRole);
@@ -171,12 +188,13 @@ function App() {
         />
       )}
 
-      {/* =========================
-          SIGNUP
-      ========================= */}
+      {/* SIGNUP */}
       {page === "signup" && (
         <Signup
-          goBack={() => setPage("landing")}
+          goBack={() =>
+            setPage("landing")
+          }
+
           onSuccess={(userRole) => {
 
             setRole(userRole);
@@ -190,12 +208,11 @@ function App() {
         />
       )}
 
-      {/* =========================
-          DASHBOARD
-      ========================= */}
+      {/* DASHBOARD */}
       {page === "dashboard" &&
         role !== "admin" && (
           <Dashboard
+
             goAddListing={() =>
               setPage("addListing")
             }
@@ -208,16 +225,17 @@ function App() {
 
             goTrades={openTrades}
 
-            // ✅ PROFILE BUTTON
             goProfile={() =>
               setPage("profile")
+            }
+
+            goSellerProfile={
+              openSellerProfile
             }
           />
         )}
 
-      {/* =========================
-          PROFILE
-      ========================= */}
+      {/* PROFILE */}
       {page === "profile" && (
         <Profile
           goBack={() =>
@@ -226,9 +244,23 @@ function App() {
         />
       )}
 
-      {/* =========================
-          ADMIN
-      ========================= */}
+      {/* SELLER PROFILE */}
+      {page ===
+        "sellerProfile" &&
+        selectedSeller && (
+          <SellerProfile
+
+            sellerId={
+              selectedSeller
+            }
+
+            goBack={() =>
+              setPage("dashboard")
+            }
+          />
+        )}
+
+      {/* ADMIN */}
       {page === "admin" &&
         role === "admin" && (
           <AdminDashboard
@@ -241,9 +273,7 @@ function App() {
           />
         )}
 
-      {/* =========================
-          ADD LISTING
-      ========================= */}
+      {/* ADD LISTING */}
       {page === "addListing" && (
         <AddListing
           goBack={() =>
@@ -252,9 +282,7 @@ function App() {
         />
       )}
 
-      {/* =========================
-          CHAT
-      ========================= */}
+      {/* CHAT */}
       {page === "chat" &&
         selectedUser && (
           <Chat
@@ -266,9 +294,7 @@ function App() {
           />
         )}
 
-      {/* =========================
-          MESSAGES
-      ========================= */}
+      {/* MESSAGES */}
       {page === "messages" && (
         <Messages
           goBack={() =>
@@ -279,9 +305,7 @@ function App() {
         />
       )}
 
-      {/* =========================
-          TRADE REQUESTS
-      ========================= */}
+      {/* TRADES */}
       {page === "trades" && (
         <TradeRequests
           goBack={() =>

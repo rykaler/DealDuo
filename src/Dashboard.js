@@ -1,15 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+// =========================
+// Dashboard.js
+// =========================
+
+import React, {
+  useEffect,
+  useState
+} from "react";
+
+import { supabase }
+from "./supabaseClient";
+
 import "./Dashboard.css";
-import EditListing from "./EditListing";
-import ListingDetails from "./ListingDetails";
+
+import EditListing
+from "./EditListing";
+
+import ListingDetails
+from "./ListingDetails";
 
 const Dashboard = ({
   goAddListing,
   goChat,
   goMessages,
   goTrades,
-  goProfile
+  goProfile,
+  goSellerProfile
 }) => {
 
   const [listings, setListings] =
@@ -56,9 +71,14 @@ const Dashboard = ({
     fetchListings();
   };
 
+  // =========================
+  // FETCH LISTINGS
+  // =========================
+
   const fetchListings = async () => {
 
-    const { data } =
+    // GET LISTINGS
+    const { data, error } =
       await supabase
         .from("listings")
         .select("*")
@@ -66,8 +86,46 @@ const Dashboard = ({
           ascending: false,
         });
 
-    setListings(data || []);
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    // GET SELLER INFO
+    const updatedListings =
+      await Promise.all(
+
+        (data || []).map(
+          async (item) => {
+
+            const {
+              data: seller
+            } = await supabase
+              .from("users")
+              .select("name, email")
+              .eq("id", item.user_id)
+              .single();
+
+            return {
+              ...item,
+
+              seller_name:
+                seller?.name ||
+
+                seller?.email?.split("@")[0] ||
+
+                "User"
+            };
+          }
+        )
+      );
+
+    setListings(updatedListings);
   };
+
+  // =========================
+  // FILTERS
+  // =========================
 
   useEffect(() => {
 
@@ -129,6 +187,10 @@ const Dashboard = ({
     status,
   ]);
 
+  // =========================
+  // LOGOUT
+  // =========================
+
   const handleLogout = async () => {
 
     await supabase.auth.signOut();
@@ -136,8 +198,12 @@ const Dashboard = ({
     window.location.href = "/";
   };
 
-  // OPEN LISTING DETAILS
+  // =========================
+  // OPEN DETAILS
+  // =========================
+
   if (selectedListing) {
+
     return (
       <ListingDetails
         listingId={selectedListing}
@@ -145,6 +211,9 @@ const Dashboard = ({
           setSelectedListing(null)
         }
         goChat={goChat}
+        goSellerProfile={
+          goSellerProfile
+        }
       />
     );
   }
@@ -216,159 +285,6 @@ const Dashboard = ({
               + Add Listing
             </button>
 
-            {/* FILTER */}
-            <div className="filter-wrapper">
-
-              <button
-                className="filter-toggle"
-                onClick={() =>
-                  setShowFilters(
-                    !showFilters
-                  )
-                }
-              >
-                ☰ Filters
-              </button>
-
-              {showFilters && (
-                <div className="filter-dropdown">
-
-                  {/* CATEGORY */}
-                  <div className="filter-group">
-
-                    <p>Category</p>
-
-                    <button
-                      onClick={() =>
-                        setCategory("Books")
-                      }
-                    >
-                      Books
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setCategory(
-                          "Uniforms"
-                        )
-                      }
-                    >
-                      Uniforms
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setCategory(
-                          "Electronics"
-                        )
-                      }
-                    >
-                      Electronics
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setCategory("")
-                      }
-                    >
-                      Clear
-                    </button>
-
-                  </div>
-
-                  {/* PRICE */}
-                  <div className="filter-group">
-
-                    <p>Price</p>
-
-                    <button
-                      onClick={() =>
-                        setPriceRange(
-                          "low"
-                        )
-                      }
-                    >
-                      ₱0-500
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setPriceRange(
-                          "mid"
-                        )
-                      }
-                    >
-                      ₱500-2000
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setPriceRange(
-                          "high"
-                        )
-                      }
-                    >
-                      ₱2000+
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setPriceRange("")
-                      }
-                    >
-                      Clear
-                    </button>
-
-                  </div>
-
-                  {/* STATUS */}
-                  <div className="filter-group">
-
-                    <p>Status</p>
-
-                    <button
-                      onClick={() =>
-                        setStatus(
-                          "available"
-                        )
-                      }
-                    >
-                      Available
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setStatus("sold")
-                      }
-                    >
-                      Sold
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setStatus(
-                          "traded"
-                        )
-                      }
-                    >
-                      Traded
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        setStatus("")
-                      }
-                    >
-                      Clear
-                    </button>
-
-                  </div>
-
-                </div>
-              )}
-
-            </div>
-
             {/* AVATAR */}
             <div
               className="avatar"
@@ -380,6 +296,7 @@ const Dashboard = ({
                 "U"}
             </div>
 
+            {/* DROPDOWN */}
             {showMenu && (
               <div className="dropdown">
 
@@ -462,8 +379,7 @@ const Dashboard = ({
 
                 <p className="posted-by">
                   Posted by{" "}
-                  {item.email ||
-                    "User"}
+                  {item.seller_name}
                 </p>
 
                 <p className="posted-time">

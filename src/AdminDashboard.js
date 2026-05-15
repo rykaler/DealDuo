@@ -51,9 +51,6 @@ const AdminDashboard = ({
 
   const lastRunRef = useRef(null);
 
-  // =========================
-  // STATS
-  // =========================
   const [stats, setStats] =
     useState({
       users: 0,
@@ -64,9 +61,6 @@ const AdminDashboard = ({
       blockedUsers: 0,
     });
 
-  // =========================
-  // DATA
-  // =========================
   const [usersList, setUsersList] =
     useState([]);
 
@@ -85,9 +79,6 @@ const AdminDashboard = ({
   const [chartData, setChartData] =
     useState(null);
 
-  // =========================
-  // INIT
-  // =========================
   useEffect(() => {
     init();
   }, []);
@@ -119,6 +110,7 @@ const AdminDashboard = ({
   // =========================
   // FETCH STATS
   // =========================
+
   const fetchStats = async () => {
 
     const { count: users } =
@@ -152,12 +144,7 @@ const AdminDashboard = ({
         .select("*", {
           count: "exact",
           head: true,
-        })
-        .in("status", [
-          "completed",
-          "accepted",
-          "success",
-        ]);
+        });
 
     const { count: sold } =
       await supabase
@@ -224,6 +211,7 @@ const AdminDashboard = ({
   // =========================
   // FETCH USERS
   // =========================
+
   const fetchUsers = async () => {
 
     const { data } =
@@ -240,66 +228,61 @@ const AdminDashboard = ({
   };
 
   // =========================
+  // SUSPEND USER
+  // =========================
+
+  const toggleSuspend =
+    async (userId, current) => {
+
+    const confirmAction =
+      window.confirm(
+        current
+          ? "Unsuspend this user?"
+          : "Suspend this user?"
+      );
+
+    if (!confirmAction)
+      return;
+
+    const { error } =
+      await supabase
+        .from("users")
+        .update({
+          is_suspended:
+            !current,
+        })
+        .eq("id", userId);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    fetchUsers();
+    fetchStats();
+  };
+
+  // =========================
   // FETCH TRADES
   // =========================
+
   const fetchTransactions =
     async () => {
 
     const { data } =
       await supabase
         .from("trades")
-        .select("*")
-        .in("status", [
-          "completed",
-          "accepted",
-          "success",
-        ]);
+        .select("*");
 
     if (!data) return;
 
-    const ids = [
-      ...new Set(
-        data.flatMap((t) => [
-          t.sender_id,
-          t.receiver_id,
-        ])
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select("id,name,email")
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setTransactions(
-      data.map((t) => ({
-        ...t,
-
-        senderName:
-          map[t.sender_id] ||
-          "Unknown",
-
-        receiverName:
-          map[t.receiver_id] ||
-          "Unknown",
-      }))
-    );
+    setTransactions(data);
   };
 
   // =========================
   // SOLD ITEMS
   // =========================
+
   const fetchSoldItems =
     async () => {
 
@@ -311,44 +294,13 @@ const AdminDashboard = ({
 
     if (!data) return;
 
-    const ids = [
-      ...new Set(
-        data.map(
-          (l) => l.user_id
-        )
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select("id,name,email")
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setSoldItems(
-      data.map((l) => ({
-        ...l,
-
-        ownerName:
-          map[l.user_id] ||
-          "Unknown",
-      }))
-    );
+    setSoldItems(data);
   };
 
   // =========================
   // FETCH REPORTS
   // =========================
+
   const fetchReports =
     async () => {
 
@@ -362,106 +314,30 @@ const AdminDashboard = ({
 
     if (!data) return;
 
-    const ids = [
-      ...new Set(
-        data.flatMap((r) => [
-          r.reporter_id,
-          r.reported_user_id,
-        ])
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select("id,name,email")
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setReportsList(
-      data.map((r) => ({
-        ...r,
-
-        reporterName:
-          map[r.reporter_id] ||
-          "Unknown",
-
-        reportedName:
-          map[
-            r.reported_user_id
-          ] || "Unknown",
-      }))
-    );
+    setReportsList(data);
   };
 
   // =========================
   // BLOCKED USERS
   // =========================
+
   const fetchBlockedUsers =
     async () => {
 
     const { data } =
       await supabase
         .from("blocked_users")
-        .select("*")
-        .order("created_at", {
-          ascending: false,
-        });
+        .select("*");
 
     if (!data) return;
 
-    const ids = [
-      ...new Set(
-        data.flatMap((b) => [
-          b.blocker_id,
-          b.blocked_id,
-        ])
-      ),
-    ];
-
-    const { data: users } =
-      await supabase
-        .from("users")
-        .select("id,name,email")
-        .in("id", ids);
-
-    const map = {};
-
-    users?.forEach((u) => {
-
-      map[u.id] =
-        u.name ||
-        u.email?.split("@")[0];
-
-    });
-
-    setBlockedUsers(
-      data.map((b) => ({
-        ...b,
-
-        blockerName:
-          map[b.blocker_id] ||
-          "Unknown",
-
-        blockedName:
-          map[b.blocked_id] ||
-          "Unknown",
-      }))
-    );
+    setBlockedUsers(data);
   };
 
   // =========================
   // RUN MODERATION
   // =========================
+
   const runAutoModeration =
     async () => {
 
@@ -498,6 +374,7 @@ const AdminDashboard = ({
   // =========================
   // EXPORT PDF
   // =========================
+
   const exportPDF = () => {
 
     const doc = new jsPDF();
@@ -532,9 +409,6 @@ const AdminDashboard = ({
     );
   };
 
-  // =========================
-  // PIE CHART
-  // =========================
   const pieData = {
     labels: [
       "Trades",
@@ -602,9 +476,7 @@ const AdminDashboard = ({
               : ""
           }
           onClick={() =>
-            setActiveTab(
-              "trades"
-            )
+            setActiveTab("trades")
           }
         >
           Trades
@@ -789,6 +661,10 @@ const AdminDashboard = ({
                   style={{
                     fontSize: "15px",
                     marginTop: "10px",
+                    color:
+                      u.is_suspended
+                        ? "#ff4d4d"
+                        : "#22c55e",
                   }}
                 >
                   {u.is_suspended
@@ -796,174 +672,19 @@ const AdminDashboard = ({
                     : "Active"}
                 </p>
 
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-        {/* TRADES */}
-        {activeTab === "trades" && (
-
-          <div className="stats-grid">
-
-            {transactions.map((t) => (
-
-              <div
-                key={t.id}
-                className="stat-card"
-              >
-
-                <h3>
-                  Successful Trade
-                </h3>
-
-                <small>
-                  Sender:
-                  {" "}
-                  {t.senderName}
-                </small>
-
-                <br />
-
-                <small>
-                  Receiver:
-                  {" "}
-                  {t.receiverName}
-                </small>
-
-                <p
-                  style={{
-                    marginTop: "10px",
-                    fontSize: "18px",
-                  }}
+                <button
+                  className="suspend-btn"
+                  onClick={() =>
+                    toggleSuspend(
+                      u.id,
+                      u.is_suspended
+                    )
+                  }
                 >
-                  {t.status}
-                </p>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-        {/* SOLD */}
-        {activeTab === "sold" && (
-
-          <div className="stats-grid">
-
-            {soldItems.map((s) => (
-
-              <div
-                key={s.id}
-                className="stat-card"
-              >
-
-                <h3>
-                  {s.title}
-                </h3>
-
-                <small>
-                  Seller:
-                  {" "}
-                  {s.ownerName}
-                </small>
-
-                <p
-                  style={{
-                    marginTop: "10px",
-                  }}
-                >
-                  SOLD
-                </p>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-        {/* REPORTS */}
-        {activeTab === "reports" && (
-
-          <div className="stats-grid">
-
-            {reportsList.map((r) => (
-
-              <div
-                key={r.id}
-                className="report-card"
-              >
-
-                <h3>
-                  {r.reason}
-                </h3>
-
-                <small>
-                  Severity:
-                  {" "}
-                  {r.severity}
-                </small>
-
-                <br />
-
-                <small>
-                  Reporter:
-                  {" "}
-                  {r.reporterName}
-                </small>
-
-                <br />
-
-                <small>
-                  Reported User:
-                  {" "}
-                  {r.reportedName}
-                </small>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
-
-        {/* BLOCKED */}
-        {activeTab === "blocked" && (
-
-          <div className="stats-grid">
-
-            {blockedUsers.map((b) => (
-
-              <div
-                key={b.id}
-                className="stat-card blocked-card"
-              >
-
-                <h3>
-                  Blocked User
-                </h3>
-
-                <small>
-                  Blocker:
-                  {" "}
-                  {b.blockerName}
-                </small>
-
-                <br />
-
-                <small>
-                  Blocked:
-                  {" "}
-                  {b.blockedName}
-                </small>
+                  {u.is_suspended
+                    ? "Unsuspend User"
+                    : "Suspend User"}
+                </button>
 
               </div>
 

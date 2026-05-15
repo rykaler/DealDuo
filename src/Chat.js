@@ -99,7 +99,7 @@ const Chat = ({
   };
 
   /* =========================
-     FETCH OLD MESSAGES
+     FETCH MESSAGES
   ========================= */
 
   useEffect(() => {
@@ -128,7 +128,6 @@ const Chat = ({
             const newMessage =
               payload.new;
 
-            // ONLY THIS CHAT
             const isCurrentChat =
               (
                 newMessage.sender_id ===
@@ -150,10 +149,8 @@ const Chat = ({
 
               setMessages(
                 (prev) => [
-
                   ...prev,
                   newMessage,
-
                 ]
               );
 
@@ -254,32 +251,108 @@ const Chat = ({
   const reportUser =
     async () => {
 
-    await supabase
+    // CHECK EXISTING REPORT
+    const {
+      data: existing
+    } = await supabase
+
       .from("reports")
-      .insert({
 
-        reporter_id:
-          user.id,
+      .select("*")
 
-        reported_user_id:
-          receiverId,
+      .eq(
+        "reporter_id",
+        user.id
+      )
 
-        severity,
+      .eq(
+        "reported_id",
+        receiverId
+      );
 
-        reason:
-          severity ===
-          "high"
+    if (
+      existing &&
+      existing.length > 0
+    ) {
 
-            ? "Harassment / Scam"
+      return showToast(
+        "⚠ You already reported this user"
+      );
+    }
 
-            : severity ===
-              "medium"
+    // INSERT REPORT
+    const { error } =
+      await supabase
 
-            ? "Misleading"
+        .from("reports")
 
-            : "Spam",
+        .insert({
 
-      });
+          reporter_id:
+            user.id,
+
+          reported_id:
+            receiverId,
+
+          severity,
+
+          reason:
+            severity ===
+            "high"
+
+              ? "Harassment / Scam"
+
+              : severity ===
+                "medium"
+
+              ? "Misleading Information"
+
+              : "Spam",
+
+        });
+
+    if (error) {
+
+      console.log(error);
+
+      return showToast(
+        "❌ Failed to report"
+      );
+    }
+
+    // CHECK REPORT COUNT
+    const {
+      data: reportCount
+    } = await supabase
+
+      .from("reports")
+
+      .select("*")
+
+      .eq(
+        "reported_id",
+        receiverId
+      );
+
+    // AUTO SUSPEND
+    if (
+      reportCount &&
+      reportCount.length >= 3
+    ) {
+
+      await supabase
+
+        .from("users")
+
+        .update({
+          is_suspended: true
+        })
+
+        .eq(
+          "id",
+          receiverId
+        );
+    }
 
     showToast(
       "⚠ Report submitted"
@@ -295,10 +368,42 @@ const Chat = ({
   const blockUser =
     async () => {
 
-    await supabase
+    const {
+      data: existing
+    } = await supabase
+
       .from(
         "blocked_users"
       )
+
+      .select("*")
+
+      .eq(
+        "blocker_id",
+        user.id
+      )
+
+      .eq(
+        "blocked_id",
+        receiverId
+      );
+
+    if (
+      existing &&
+      existing.length > 0
+    ) {
+
+      return showToast(
+        "🚫 User already blocked"
+      );
+    }
+
+    await supabase
+
+      .from(
+        "blocked_users"
+      )
+
       .insert({
 
         blocker_id:
@@ -418,8 +523,7 @@ const Chat = ({
                   </option>
 
                   <option value="high">
-                    Scam /
-                    Harassment
+                    Scam / Harassment
                   </option>
 
                 </select>
@@ -575,4 +679,4 @@ const Chat = ({
   );
 };
 
-export default Chat;
+export default Chat;  

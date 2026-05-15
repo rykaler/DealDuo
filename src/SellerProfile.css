@@ -1,4 +1,4 @@
-/* Profile.css */
+/* SellerProfile.css */
 
 .profile-page {
   min-height: 100vh;
@@ -21,23 +21,15 @@
 
 .back-btn {
   background: transparent;
-
   border: none;
-
-  outline: none;
-
-  box-shadow: none;
 
   display: flex;
   align-items: center;
-
   gap: 10px;
 
   cursor: pointer;
 
   padding: 0;
-
-  width: fit-content;
 }
 
 .back-btn:hover {
@@ -45,6 +37,7 @@
 }
 
 .arrow {
+  color: #f4c430;
   font-size: 32px;
   font-weight: bold;
 }
@@ -53,13 +46,6 @@
   color: white;
   font-size: 22px;
   font-weight: bold;
-}
-
-.back-btn:focus,
-.back-btn:active {
-  outline: none;
-  box-shadow: none;
-  border: none;
 }
 
 /* =========================
@@ -83,10 +69,6 @@
   margin-bottom: 50px;
 
   box-sizing: border-box;
-}
-
-.profile-card:hover {
-  transform: none;
 }
 
 .profile-avatar {
@@ -120,7 +102,7 @@
 }
 
 /* =========================
-   MY LISTINGS
+   LISTINGS
 ========================= */
 
 .my-listings {
@@ -166,7 +148,7 @@
 }
 
 .listing-card:hover {
-  transform: none;
+  transform: translateY(-5px);
 }
 
 /* SOLD / TRADED */

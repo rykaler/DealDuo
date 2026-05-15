@@ -72,11 +72,9 @@ body {
   transition: 0.2s;
 }
 
-.back-btn:hover {
+.back-btn-listing:hover {
   transform: scale(1.05);
 }
-
-/* IMAGE */
 
 /* IMAGE */
 
@@ -101,7 +99,7 @@ body {
   background: transparent;
 
   box-shadow: none;
-} 
+}
 
 /* SOLD / TRADED BADGE */
 
@@ -123,6 +121,13 @@ body {
   font-weight: bold;
 
   letter-spacing: 1px;
+}
+
+/* YELLOW BORDER SA PICTURE */
+
+.image-container.sold-image img,
+.image-container.traded-image img {
+  border: 5px solid #D5AD36;
 }
 
 /* RIGHT SIDE */
@@ -187,6 +192,66 @@ body {
   font-weight: 600;
 }
 
+/* VIEW PROFILE BUTTON */
+
+.view-profile-btn {
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: #D5AD36;
+
+  color: #081521;
+
+  font-size: 17px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  margin-top: 18px;
+}
+
+.view-profile-btn:hover {
+  opacity: 0.9;
+}
+
+/* REPORT BUTTON */
+
+.report-btn {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: crimson;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.report-btn:hover {
+  opacity: 0.9;
+}
+
 /* ACTION BUTTONS */
 
 .action-buttons {
@@ -212,6 +277,8 @@ body {
   cursor: pointer;
 
   transition: 0.2s;
+
+  margin-top: 14px;
 }
 
 .message-btn:hover {
@@ -414,3 +481,4 @@ body {
   font-size: 28px;
   font-weight: bold;
 }
+

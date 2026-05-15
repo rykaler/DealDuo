@@ -1,38 +1,55 @@
-// Profile.js
+// SellerProfile.js
 
-import React, { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import { supabase }
+from "./supabaseClient";
+
 import "./Profile.css";
 
-const Profile = ({ goBack }) => {
+const SellerProfile = ({
+  sellerId,
+  goBack,
+}) => {
 
-  const [user, setUser] = useState(null);
-  const [listings, setListings] = useState([]);
+  const [seller, setSeller] =
+    useState(null);
+
+  const [listings, setListings] =
+    useState([]);
 
   useEffect(() => {
-    fetchProfile();
+    fetchSeller();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchSeller =
+    async () => {
 
+    // FETCH SELLER
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: sellerData,
+    } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", sellerId)
+      .single();
 
-    setUser(user);
+    setSeller(sellerData);
 
-    if (user) {
-
-      const { data } = await supabase
+    // FETCH SELLER LISTINGS
+    const { data } =
+      await supabase
         .from("listings")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", sellerId)
         .order("created_at", {
           ascending: false,
         });
 
-      setListings(data || []);
-    }
+    setListings(data || []);
   };
 
   return (
@@ -52,7 +69,7 @@ const Profile = ({ goBack }) => {
           </span>
 
           <span className="back-text">
-            Profile
+            Seller Profile
           </span>
         </button>
 
@@ -64,25 +81,26 @@ const Profile = ({ goBack }) => {
       <div className="profile-card">
 
         <div className="profile-avatar">
-          {user?.email?.[0]?.toUpperCase() || "U"}
+          {seller?.email?.[0]?.toUpperCase() || "U"}
         </div>
 
         <h1>
-          {user?.email?.split("@")[0]}
+          {seller?.name ||
+            seller?.email?.split("@")[0]}
         </h1>
 
         <p className="email">
-          {user?.email}
+          {seller?.email}
         </p>
 
       </div>
 
       {/* =========================
-          MY LISTINGS
+          LISTINGS
       ========================= */}
       <div className="my-listings">
 
-        <h2>My Listings</h2>
+        <h2>Seller Listings</h2>
 
         <div className="listing-grid">
 
@@ -95,30 +113,37 @@ const Profile = ({ goBack }) => {
             listings.map((item) => (
 
               <div
-                className={`listing-card
-                  ${item.is_sold ? "sold" : ""}
-                  ${item.is_traded ? "traded" : ""}
-                `}
+                className={`listing-card ${
+                  item.is_sold
+                    ? "sold"
+                    : item.is_traded
+                    ? "traded"
+                    : ""
+                }`}
                 key={item.id}
               >
 
+                {/* SOLD */}
                 {item.is_sold && (
                   <div className="badge">
                     SOLD
                   </div>
                 )}
 
+                {/* TRADED */}
                 {item.is_traded && (
                   <div className="badge traded">
                     TRADED
                   </div>
                 )}
 
+                {/* IMAGE */}
                 <img
                   src={item.image_url}
                   alt=""
                 />
 
+                {/* INFO */}
                 <h3>{item.title}</h3>
 
                 <p className="price">
@@ -139,4 +164,4 @@ const Profile = ({ goBack }) => {
   );
 };
 
-export default Profile;
+export default SellerProfile;

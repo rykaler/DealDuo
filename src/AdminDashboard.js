@@ -228,6 +228,223 @@ const AdminDashboard = ({
   };
 
   // =========================
+  // FETCH TRADES
+  // =========================
+
+  const fetchTransactions =
+    async () => {
+
+    const { data } =
+      await supabase
+        .from("trades")
+        .select("*");
+
+    if (!data) return;
+
+    const updated =
+      await Promise.all(
+
+        data.map(async (trade) => {
+
+          const {
+            data: sender
+          } = await supabase
+            .from("users")
+            .select("name,email")
+            .eq(
+              "id",
+              trade.sender_id
+            )
+            .single();
+
+          const {
+            data: receiver
+          } = await supabase
+            .from("users")
+            .select("name,email")
+            .eq(
+              "id",
+              trade.receiver_id
+            )
+            .single();
+
+          return {
+
+            ...trade,
+
+            senderName:
+              sender?.name ||
+
+              sender?.email?.split("@")[0] ||
+
+              "Unknown User",
+
+            receiverName:
+              receiver?.name ||
+
+              receiver?.email?.split("@")[0] ||
+
+              "Unknown User",
+
+          };
+
+        })
+
+      );
+
+    setTransactions(updated);
+  };
+
+  // =========================
+  // SOLD ITEMS
+  // =========================
+
+  const fetchSoldItems =
+    async () => {
+
+    const { data } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .eq("is_sold", true);
+
+    if (!data) return;
+
+    setSoldItems(data);
+  };
+
+  // =========================
+  // FETCH REPORTS
+  // =========================
+
+  // =========================
+// FETCH REPORTS
+// =========================
+
+const fetchReports =
+  async () => {
+
+  const { data } =
+    await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", {
+        ascending: false,
+      });
+
+  if (!data) return;
+
+  const updated =
+    await Promise.all(
+
+      data.map(async (report) => {
+
+        // GET REPORTED USER
+        const {
+          data: reported
+        } = await supabase
+          .from("users")
+          .select("name,email")
+          .eq(
+            "id",
+            report.reported_id
+          )
+          .single();
+
+        return {
+
+          ...report,
+
+          reportedName:
+            reported?.name ||
+
+            reported?.email?.split("@")[0] ||
+
+            "Unknown User",
+
+        };
+
+      })
+
+    );
+
+  setReportsList(updated);
+};
+
+  // =========================
+  // FETCH BLOCKED USERS
+  // =========================
+
+  // =========================
+// FETCH BLOCKED USERS
+// =========================
+
+const fetchBlockedUsers =
+  async () => {
+
+  const { data } =
+    await supabase
+      .from("blocked_users")
+      .select("*");
+
+  if (!data) return;
+
+  const updated =
+    await Promise.all(
+
+      data.map(async (block) => {
+
+        // GET BLOCKER INFO
+        const {
+          data: blocker
+        } = await supabase
+          .from("users")
+          .select("name,email")
+          .eq(
+            "id",
+            block.blocker_id
+          )
+          .single();
+
+        // GET BLOCKED INFO
+        const {
+          data: blocked
+        } = await supabase
+          .from("users")
+          .select("name,email")
+          .eq(
+            "id",
+            block.blocked_id
+          )
+          .single();
+
+        return {
+
+          ...block,
+
+          blockerName:
+            blocker?.name ||
+
+            blocker?.email?.split("@")[0] ||
+
+            "Unknown User",
+
+          blockedName:
+            blocked?.name ||
+
+            blocked?.email?.split("@")[0] ||
+
+            "Unknown User",
+
+        };
+
+      })
+
+    );
+
+  setBlockedUsers(updated);
+};
+  // =========================
   // SUSPEND USER
   // =========================
 
@@ -260,115 +477,6 @@ const AdminDashboard = ({
 
     fetchUsers();
     fetchStats();
-  };
-
-  // =========================
-  // FETCH TRADES
-  // =========================
-
-  const fetchTransactions =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("trades")
-        .select("*");
-
-    if (!data) return;
-
-    setTransactions(data);
-  };
-
-  // =========================
-  // SOLD ITEMS
-  // =========================
-
-  const fetchSoldItems =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("listings")
-        .select("*")
-        .eq("is_sold", true);
-
-    if (!data) return;
-
-    setSoldItems(data);
-  };
-
-  // =========================
-  // FETCH REPORTS
-  // =========================
-
-  const fetchReports =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("reports")
-        .select("*")
-        .order("created_at", {
-          ascending: false,
-        });
-
-    if (!data) return;
-
-    setReportsList(data);
-  };
-
-  // =========================
-  // BLOCKED USERS
-  // =========================
-
-  const fetchBlockedUsers =
-    async () => {
-
-    const { data } =
-      await supabase
-        .from("blocked_users")
-        .select("*");
-
-    if (!data) return;
-
-    setBlockedUsers(data);
-  };
-
-  // =========================
-  // RUN MODERATION
-  // =========================
-
-  const runAutoModeration =
-    async () => {
-
-    const now = Date.now();
-
-    if (
-      lastRunRef.current &&
-      now -
-        lastRunRef.current <
-        300000
-    ) {
-      alert(
-        "Wait before running moderation again"
-      );
-
-      return;
-    }
-
-    lastRunRef.current = now;
-
-    setLoading(true);
-
-    setTimeout(() => {
-
-      setLoading(false);
-
-      alert(
-        "Moderation completed"
-      );
-
-    }, 2000);
   };
 
   // =========================
@@ -551,16 +659,6 @@ const AdminDashboard = ({
             </button>
 
             <button
-              onClick={
-                runAutoModeration
-              }
-            >
-              {loading
-                ? "Running..."
-                : "Run Moderation"}
-            </button>
-
-            <button
               onClick={goBack}
             >
               Logout
@@ -602,7 +700,7 @@ const AdminDashboard = ({
                 <p>{stats.sold}</p>
               </div>
 
-              <div className="stat-card blocked-card">
+              <div className="stat-card">
                 <h3>Blocked Users</h3>
                 <p>
                   {stats.blockedUsers}
@@ -672,20 +770,6 @@ const AdminDashboard = ({
                     : "Active"}
                 </p>
 
-                <button
-                  className="suspend-btn"
-                  onClick={() =>
-                    toggleSuspend(
-                      u.id,
-                      u.is_suspended
-                    )
-                  }
-                >
-                  {u.is_suspended
-                    ? "Unsuspend User"
-                    : "Suspend User"}
-                </button>
-
               </div>
 
             ))}
@@ -693,6 +777,175 @@ const AdminDashboard = ({
           </div>
 
         )}
+
+       {/* TRADES */}
+{activeTab === "trades" && (
+
+  <div className="stats-grid">
+
+    {transactions.length === 0 ? (
+
+      <div className="stat-card">
+
+        <h3>
+          No trades yet
+        </h3>
+
+      </div>
+
+    ) : (
+
+      transactions.map((trade, index) => (
+
+        <div
+          key={index}
+          className="stat-card"
+        >
+
+          <h3>
+            Successful Trade
+          </h3>
+
+          <p>
+            Sender:
+            {" "}
+            {trade.senderName}
+          </p>
+
+          <p>
+            Receiver:
+            {" "}
+            {trade.receiverName}
+          </p>
+
+          <p
+            style={{
+              marginTop: "10px",
+              color: "#22c55e",
+              fontWeight: "bold",
+            }}
+          >
+            Trade Completed
+          </p>
+
+        </div>
+
+      ))
+
+    )}
+
+  </div>
+
+)}
+
+{/* SOLD */}
+{activeTab === "sold" && (
+
+  <div className="stats-grid">
+
+    {soldItems.map((item) => (
+
+      <div
+        key={item.id}
+        className="stat-card"
+      >
+
+        <h3>
+          {item.title}
+        </h3>
+
+        <p>
+          ₱{item.price}
+        </p>
+
+        <p
+          style={{
+            color: "#FFC107",
+            marginTop: "10px",
+          }}
+        >
+          Sold Item
+        </p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
+
+{/* REPORTS */}
+{activeTab === "reports" && (
+
+  <div className="stats-grid">
+
+    {reportsList.map((report) => (
+
+      <div
+        key={report.id}
+        className="stat-card"
+      >
+
+        <h3>
+          {report.reason}
+        </h3>
+
+        <p>
+          Severity:
+          {" "}
+          {report.severity}
+        </p>
+
+        <small>
+          Reported User ID:
+          {" "}
+          {report.reportedName}
+        </small>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
+
+{/* BLOCKED USERS */}
+{activeTab === "blocked" && (
+
+  <div className="stats-grid">
+
+    {blockedUsers.map((block) => (
+
+      <div
+        key={block.id}
+        className="stat-card"
+      >
+
+        <h3>
+          Blocked User
+        </h3> 
+
+        <p>
+          Blocker:
+          {" "}
+          {block.blockerName}
+        </p>
+
+        <p>
+          Blocked:
+          {" "}
+          {block.blockedName}
+        </p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+)}
 
       </div>
 

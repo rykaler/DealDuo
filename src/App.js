@@ -15,6 +15,7 @@ import Signup from "./Signup";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import AddListing from "./AddListing";
+import EditListing from "./EditListing";
 import Chat from "./Chat";
 import Messages from "./Messages";
 import AdminDashboard from "./AdminDashboard";

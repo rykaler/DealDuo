@@ -12,6 +12,8 @@ from "./supabaseClient";
 
 import "./ListingDetails.css";
 
+import EditListing from "./EditListing";
+
 const ListingDetails = ({
   listingId,
   goBack,
@@ -29,6 +31,9 @@ const ListingDetails = ({
     useState(
       "Hi, is this still available?"
     );
+
+    const [editOpen, setEditOpen] =
+  useState(false);
 
   useEffect(() => {
     init();
@@ -157,6 +162,22 @@ const ListingDetails = ({
     fetchItem();
   };
 
+if (editOpen) {
+
+  return (
+    <EditListing
+      id={item.id}
+      onClose={() => {
+
+        setEditOpen(false);
+
+        fetchItem();
+
+      }}
+    />
+  );
+}
+
   if (!item) {
     return (
       <div className="loading">
@@ -248,11 +269,14 @@ const ListingDetails = ({
 
             <div className="owner-buttons">
 
-              <button
-                className="owner-btn"
-              >
-                Edit
-              </button>
+           <button
+  className="owner-btn"
+  onClick={() =>
+    setEditOpen(true)
+  }
+>
+  Edit
+</button>
 
               {!item.is_sold &&
                 !item.is_traded && (

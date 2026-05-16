@@ -56,7 +56,7 @@ export default function EditListing({ id, onClose }) {
       return;
     }
 
-    alert("✅ Updated successfully!");
+    alert(" Updated successfully!");
 
     // CLOSE MODAL
     if (onClose) {

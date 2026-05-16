@@ -204,19 +204,28 @@ const Dashboard = ({
 
   if (selectedListing) {
 
-    return (
-      <ListingDetails
-        listingId={selectedListing}
-        goBack={() =>
-          setSelectedListing(null)
-        }
-        goChat={goChat}
-        goSellerProfile={
-          goSellerProfile
-        }
-      />
-    );
-  }
+  return (
+
+    <ListingDetails
+      listingId={selectedListing}
+
+      goBack={() => {
+
+        setSelectedListing(null);
+
+        fetchListings();
+
+      }}
+
+      goChat={goChat}
+
+      goSellerProfile={
+        goSellerProfile
+      }
+    />
+
+  );
+}
 
   const displayItems =
     category ||

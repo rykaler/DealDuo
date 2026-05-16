@@ -512,3 +512,29 @@ body {
 .view-profile-btn:hover {
   opacity: 0.9;
 }
+
+.edit-btn {
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding: 10px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #D5AD36;
+
+  color: #081521;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  opacity: 0.9;
+}

@@ -21,6 +21,7 @@ import AdminDashboard from "./AdminDashboard";
 import TradeRequests from "./TradeRequest";
 import Profile from "./Profile";
 import SellerProfile from "./SellerProfile";
+import ResetPassword from "./ResetPassword";
 
 function App() {
 
@@ -40,8 +41,25 @@ function App() {
     useState(true);
 
   useEffect(() => {
-    checkSession();
-  }, []);
+
+  // RESET PASSWORD PAGE
+  if (
+    window.location.pathname ===
+    "/reset-password"
+  ) {
+
+    setPage(
+      "resetPassword"
+    );
+
+    setLoading(false);
+
+    return;
+  }
+
+  checkSession();
+
+}, []);
 
   const checkSession = async () => {
 
@@ -315,6 +333,11 @@ function App() {
           goChat={openChat}
         />
       )}
+
+      {/* RESET PASSWORD */}
+{page === "resetPassword" && (
+  <ResetPassword />
+)}
 
     </>
   );

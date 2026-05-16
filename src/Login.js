@@ -99,7 +99,8 @@ const Login = ({ goBack, onSuccess }) => {
           email,
           {
             redirectTo:
-              "https://deal-duo.vercel.app/reset-password",
+  window.location.origin +
+  "/reset-password",
           }
         );
 

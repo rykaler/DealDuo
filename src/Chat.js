@@ -61,13 +61,48 @@ const Chat = ({
 
     if (data.user) {
 
+      // CHECK IF SUSPENDED
+      const {
+        data: currentUser
+      } = await supabase
+
+        .from("users")
+
+        .select("is_suspended")
+
+        .eq(
+          "id",
+          data.user.id
+        )
+
+        .single();
+
+      if (
+        currentUser?.is_suspended
+      ) {
+
+        alert(
+          "Your account has been suspended."
+        );
+
+        window.location.href = "/";
+        return;
+      }
+
       // RECEIVER INFO
       const {
         data: receiverData
       } = await supabase
+
         .from("users")
+
         .select("name,email")
-        .eq("id", receiverId)
+
+        .eq(
+          "id",
+          receiverId
+        )
+
         .single();
 
       setReceiver(receiverData);
@@ -87,8 +122,11 @@ const Chat = ({
 
     const { data } =
       await supabase
+
         .from("blocked_users")
+
         .select("*")
+
         .or(
           `and(blocker_id.eq.${myId},blocked_id.eq.${receiverId}),and(blocker_id.eq.${receiverId},blocked_id.eq.${myId})`
         );
@@ -108,7 +146,6 @@ const Chat = ({
 
     fetchMessages();
 
-    // REALTIME
     const channel =
       supabase
         .channel(
@@ -174,7 +211,9 @@ const Chat = ({
 
     const { data } =
       await supabase
+
         .from("messages")
+
         .select("*")
 
         .or(
@@ -229,7 +268,9 @@ const Chat = ({
     setText("");
 
     await supabase
+
       .from("messages")
+
       .insert({
 
         sender_id:
@@ -320,7 +361,7 @@ const Chat = ({
       );
     }
 
-    // CHECK REPORT COUNT
+    // COUNT REPORTS
     const {
       data: reportCount
     } = await supabase
@@ -330,34 +371,48 @@ const Chat = ({
       .select("*")
 
       .eq(
-        "reported_id",
-        receiverId
-      );
+  "reported_id",
+  receiverId
+)
+.limit(5);
 
-    // AUTO SUSPEND
-    if (
-      reportCount &&
-      reportCount.length >= 5
-    ) {
+    // AUTO SUSPEND AFTER 5 REPORTS
+if (
+  (reportCount?.length || 0) >= 5
+) {
 
-      await supabase
+  const targetId =
+    reportCount[0]
+      ?.reported_id;
 
-        .from("users")
+  const {
+    data: suspendedUser,
+    error: suspendError
+  } = await supabase
 
-        .update({
-          is_suspended: true
-        })
+    .from("users")
 
-        .eq(
-          "id",
-          receiverId
-        );
-    }
+    .update({
+      is_suspended: true
+    })
 
-    showToast(
-      "⚠ Report submitted"
-    );
+    .eq(
+      "id",
+      targetId
+    )
 
+    .select();
+
+  console.log(
+    "Suspended User:",
+    suspendedUser
+  );
+
+  console.log(
+    "Suspend Error:",
+    suspendError
+  );
+}
     setMenuOpen(false);
   };
 
@@ -677,6 +732,6 @@ const Chat = ({
 
     </div>
   );
-};
+};  
 
-export default Chat;  
+export default Chat;

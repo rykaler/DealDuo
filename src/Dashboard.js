@@ -284,6 +284,163 @@ const Dashboard = ({
             >
               + Add Listing
             </button>
+            <div className="filter-wrapper">
+
+  <button
+    className="filter-toggle"
+    onClick={() =>
+      setShowFilters(
+        !showFilters
+      )
+    }
+  >
+    Filter
+  </button>
+
+  {showFilters && (
+
+    <div className="filter-dropdown">
+
+      {/* CATEGORY */}
+      <div className="filter-group">
+
+        <p>Category</p>
+
+        <button
+          onClick={() =>
+            setCategory("")
+          }
+        >
+          All
+        </button>
+
+        <button
+          onClick={() =>
+            setCategory(
+              "Books"
+            )
+          }
+        >
+          Books
+        </button>
+
+        <button
+          onClick={() =>
+            setCategory(
+              "Uniform"
+            )
+          }
+        >
+          Uniform
+        </button>
+
+        <button
+          onClick={() =>
+            setCategory(
+              "Electronics"
+            )
+          }
+        >
+          Electronics
+        </button>
+
+      </div>
+
+      {/* PRICE */}
+      <div className="filter-group">
+
+        <p>Price</p>
+
+        <button
+          onClick={() =>
+            setPriceRange("")
+          }
+        >
+          All
+        </button>
+
+        <button
+          onClick={() =>
+            setPriceRange(
+              "low"
+            )
+          }
+        >
+          Below ₱500
+        </button>
+
+        <button
+          onClick={() =>
+            setPriceRange(
+              "mid"
+            )
+          }
+        >
+          ₱500 - ₱2000
+        </button>
+
+        <button
+          onClick={() =>
+            setPriceRange(
+              "high"
+            )
+          }
+        >
+          Above ₱2000
+        </button>
+
+      </div>
+
+      {/* STATUS */}
+      <div className="filter-group">
+
+        <p>Status</p>
+
+        <button
+          onClick={() =>
+            setStatus("")
+          }
+        >
+          All
+        </button>
+
+        <button
+          onClick={() =>
+            setStatus(
+              "available"
+            )
+          }
+        >
+          Available
+        </button>
+
+        <button
+          onClick={() =>
+            setStatus(
+              "sold"
+            )
+          }
+        >
+          Sold
+        </button>
+
+        <button
+          onClick={() =>
+            setStatus(
+              "traded"
+            )
+          }
+        >
+          Traded
+        </button>
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
 
             {/* AVATAR */}
             <div

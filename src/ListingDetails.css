@@ -473,73 +473,135 @@ body {
   font-weight: bold;
 }
 
+/* TRADE BUTTON */
+
 .trade-btn {
   width: 100%;
+
+  margin-top: 12px;
+
   padding: 15px;
+
   border: none;
-  border-radius: 12px;
+
+  border-radius: 14px;
 
   background: #D5AD36;
-  color: black;
+
+  color: #081521;
 
   font-size: 18px;
   font-weight: bold;
 
   cursor: pointer;
+
+  transition: 0.2s;
 }
+
+.trade-btn:hover {
+  opacity: 0.9;
+}
+
+/* TRADE MODAL */
 
 .trade-modal {
   position: fixed;
+
   top: 50%;
   left: 50%;
 
   transform: translate(-50%, -50%);
 
-  background: #132235;
+  width: 350px;
+
+  background: #0A1B2A;
+
+  border-radius: 18px;
+
   padding: 25px;
 
-  border-radius: 16px;
-
-  width: 320px;
-
   z-index: 9999;
+
+  box-shadow:
+    0 10px 35px rgba(0,0,0,0.45);
 }
 
 .trade-modal h2 {
   color: white;
-  margin-bottom: 15px;
+
+  font-size: 32px;
+
+  margin-bottom: 20px;
 }
+
+/* SELECT */
 
 .trade-modal select {
   width: 100%;
-  padding: 12px;
 
-  border-radius: 10px;
-  border: none;
-
-  margin-bottom: 15px;
-}
-
-.send-trade-btn,
-.close-trade-btn {
-  width: 100%;
-  padding: 12px;
+  padding: 14px;
 
   border: none;
-  border-radius: 10px;
 
-  margin-top: 10px;
+  border-radius: 12px;
 
-  cursor: pointer;
+  outline: none;
+
+  font-size: 16px;
+
+  background: white;
+
+  margin-bottom: 12px;
 }
+
+/* SEND BUTTON */
 
 .send-trade-btn {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 12px;
+
   background: #D5AD36;
+
+  color: #081521;
+
+  font-size: 16px;
   font-weight: bold;
+
+  cursor: pointer;
+
+  margin-top: 8px;
+
+  transition: 0.2s;
 }
+
+.send-trade-btn:hover {
+  opacity: 0.9;
+}
+
+/* CANCEL BUTTON */
 
 .close-trade-btn {
-  background: #ddd;
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #e5e7eb;
+
+  color: black;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  margin-top: 10px;
 }
-
-

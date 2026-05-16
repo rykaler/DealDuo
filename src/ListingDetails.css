@@ -288,33 +288,24 @@ body {
 /* OWNER BUTTONS */
 
 .owner-buttons {
-  margin-top: 22px;
-
   display: flex;
   flex-direction: column;
-
-  gap: 12px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .owner-btn {
   width: 100%;
-
-  padding: 15px;
-
-  border: none;
-
-  border-radius: 14px;
+  padding: 12px;
 
   background: #D5AD36;
-
   color: #081521;
 
-  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+
   font-weight: bold;
-
   cursor: pointer;
-
-  transition: 0.2s;
 }
 
 .owner-btn:hover {
@@ -481,4 +472,74 @@ body {
   font-size: 28px;
   font-weight: bold;
 }
+
+.trade-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+
+  background: #D5AD36;
+  color: black;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.trade-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  background: #132235;
+  padding: 25px;
+
+  border-radius: 16px;
+
+  width: 320px;
+
+  z-index: 9999;
+}
+
+.trade-modal h2 {
+  color: white;
+  margin-bottom: 15px;
+}
+
+.trade-modal select {
+  width: 100%;
+  padding: 12px;
+
+  border-radius: 10px;
+  border: none;
+
+  margin-bottom: 15px;
+}
+
+.send-trade-btn,
+.close-trade-btn {
+  width: 100%;
+  padding: 12px;
+
+  border: none;
+  border-radius: 10px;
+
+  margin-top: 10px;
+
+  cursor: pointer;
+}
+
+.send-trade-btn {
+  background: #D5AD36;
+  font-weight: bold;
+}
+
+.close-trade-btn {
+  background: #ddd;
+}
+
 

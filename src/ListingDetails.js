@@ -32,8 +32,21 @@ const ListingDetails = ({
       "Hi, is this still available?"
     );
 
-    const [editOpen, setEditOpen] =
-  useState(false);
+  const [showTradeModal,
+    setShowTradeModal] =
+    useState(false);
+
+  const [myListings,
+    setMyListings] =
+    useState([]);
+
+  const [selectedTradeItem,
+    setSelectedTradeItem] =
+    useState("");
+
+  const [editOpen,
+    setEditOpen] =
+    useState(false);
 
   useEffect(() => {
     init();
@@ -47,8 +60,14 @@ const ListingDetails = ({
 
     setUser(user);
 
-    fetchItem();
+    await fetchItem();
+
+    await fetchMyListings();
   };
+
+  // =========================
+  // FETCH ITEM
+  // =========================
 
   const fetchItem = async () => {
 
@@ -67,7 +86,36 @@ const ListingDetails = ({
     setItem(data);
   };
 
+  // =========================
+  // FETCH MY LISTINGS
+  // =========================
+
+  const fetchMyListings = async () => {
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data, error } =
+      await supabase
+        .from("listings")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_sold", false)
+        .eq("is_traded", false)
+        .neq("id", listingId);
+
+    if (!error) {
+      setMyListings(data || []);
+    }
+  };
+
+  // =========================
   // SEND MESSAGE
+  // =========================
+
   const handleSend = async () => {
 
     if (!user) {
@@ -101,7 +149,10 @@ const ListingDetails = ({
     goChat(item.user_id);
   };
 
+  // =========================
   // DELETE
+  // =========================
+
   const handleDelete = async () => {
 
     const confirmDelete =
@@ -126,7 +177,10 @@ const ListingDetails = ({
     goBack();
   };
 
+  // =========================
   // MARK SOLD
+  // =========================
+
   const handleSold = async () => {
 
     const { error } =
@@ -144,7 +198,10 @@ const ListingDetails = ({
     fetchItem();
   };
 
+  // =========================
   // MARK TRADED
+  // =========================
+
   const handleTraded = async () => {
 
     const { error } =
@@ -162,21 +219,25 @@ const ListingDetails = ({
     fetchItem();
   };
 
-if (editOpen) {
+  // =========================
+  // EDIT MODAL
+  // =========================
 
-  return (
-    <EditListing
-      id={item.id}
-      onClose={() => {
+  if (editOpen) {
 
-        setEditOpen(false);
+    return (
+      <EditListing
+        id={item.id}
+        onClose={() => {
 
-        fetchItem();
+          setEditOpen(false);
 
-      }}
-    />
-  );
-}
+          fetchItem();
+
+        }}
+      />
+    );
+  }
 
   if (!item) {
     return (
@@ -228,13 +289,9 @@ if (editOpen) {
 
         <div className="info-card">
 
-          <h1>
-            {item.title}
-          </h1>
+          <h1>{item.title}</h1>
 
-          <h2>
-            ₱{item.price}
-          </h2>
+          <h2>₱{item.price}</h2>
 
           <p className="posted">
             Posted on{" "}
@@ -244,11 +301,10 @@ if (editOpen) {
           </p>
 
           <p className="seller-name">
-            Seller:{" "}
-            {item.email || "User"}
+            Seller: {item.email || "User"}
           </p>
 
-          {/* VIEW PROFILE BUTTON */}
+          {/* VIEW PROFILE */}
           {user?.id !== item.user_id && (
 
             <button
@@ -269,14 +325,14 @@ if (editOpen) {
 
             <div className="owner-buttons">
 
-           <button
-  className="owner-btn"
-  onClick={() =>
-    setEditOpen(true)
-  }
->
-  Edit
-</button>
+              <button
+                className="owner-btn"
+                onClick={() =>
+                  setEditOpen(true)
+                }
+              >
+                Edit
+              </button>
 
               {!item.is_sold &&
                 !item.is_traded && (
@@ -315,21 +371,146 @@ if (editOpen) {
           ) : (
 
             <>
-              {/* MESSAGE BUTTON */}
+              {/* ACTION BUTTONS */}
               <div className="action-buttons">
 
                 <button
                   className="message-btn"
                   onClick={() =>
-                    goChat(
-                      item.user_id
-                    )
+                    goChat(item.user_id)
                   }
                 >
                   Message
                 </button>
 
+                <button
+                  className="trade-btn"
+                  onClick={async () => {
+
+                    await fetchMyListings();
+
+                    setShowTradeModal(true);
+
+                  }}
+                >
+                  Trade
+                </button>
+
               </div>
+
+              {/* TRADE MODAL */}
+              {showTradeModal && (
+
+                <div className="trade-modal">
+
+                  <h2>Trade Offer</h2>
+
+                  <select
+                    value={
+                      selectedTradeItem
+                    }
+                    onChange={(e) =>
+                      setSelectedTradeItem(
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option
+                      value=""
+                      disabled
+                    >
+                      Select your item
+                    </option>
+
+                    {myListings.map(
+                      (listing) => (
+
+                        <option
+                          key={listing.id}
+                          value={listing.id}
+                        >
+                          {listing.title}
+                        </option>
+
+                      )
+                    )}
+
+                  </select>
+
+                  <button
+                    className="send-trade-btn"
+                    onClick={async () => {
+
+                      if (
+                        !selectedTradeItem
+                      ) {
+                        alert(
+                          "Select an item first"
+                        );
+                        return;
+                      }
+
+                      const {
+                        data: { user }
+                      } =
+                        await supabase.auth.getUser();
+
+                      const { error } =
+                        await supabase
+                          .from("trades")
+                          .insert([
+                            {
+                              sender_id:
+                                user.id,
+
+                              receiver_id:
+                                item.user_id,
+
+                              listing_id:
+                                item.id,
+
+                              offered_listing_id:
+                                selectedTradeItem,
+
+                              status:
+                                "pending"
+                            }
+                          ]);
+
+                      if (error) {
+                        alert(
+                          error.message
+                        );
+                        return;
+                      }
+
+                      alert(
+                        "Trade request sent!"
+                      );
+
+                      setShowTradeModal(
+                        false
+                      );
+                    }}
+                  >
+                    Send Trade Offer
+                  </button>
+
+                  <button
+                    className="close-trade-btn"
+                    onClick={() =>
+                      setShowTradeModal(
+                        false
+                      )
+                    }
+                  >
+                    Cancel
+                  </button>
+
+                </div>
+
+              )}
 
               {/* MESSAGE BOX */}
               <div className="seller-box">
@@ -367,21 +548,15 @@ if (editOpen) {
 
             <div className="detail-row">
 
-              <span>
-                Condition
-              </span>
+              <span>Condition</span>
 
-              <span>
-                Used
-              </span>
+              <span>Used</span>
 
             </div>
 
             <div className="detail-row">
 
-              <span>
-                Category
-              </span>
+              <span>Category</span>
 
               <span>
                 {item.category}
@@ -394,9 +569,7 @@ if (editOpen) {
           {/* DESCRIPTION */}
           <div className="description-box">
 
-            <h3>
-              Description
-            </h3>
+            <h3>Description</h3>
 
             <p>
               {item.description}
